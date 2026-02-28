@@ -2,49 +2,75 @@
     <!DOCTYPE html>
     <html>
     <head>
-        <title>金融核武库监控台</title>
+        <title>极简金矿</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>
-            body { font-family: -apple-system, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f0f2f5; }
-            .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
-            h1 { color: #1a1a1a; text-align: center; }
-            .time { text-align: center; color: #666; font-size: 0.9em; margin-bottom: 30px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-            th { background-color: #fafafa; color: #666; }
-            .value { font-weight: bold; font-family: monospace; font-size: 1.1em; }
-            .signal-box { background: #fff3cd; color: #856404; padding: 15px; border-radius: 5px; border-left: 5px solid #ffc107; }
-            .footer { text-align: center; margin-top: 40px; color: #999; font-size: 0.8em; }
+            body { font-family: -apple-system, system-ui, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+            .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow-x: auto; }
+            h1 { text-align: center; margin-bottom: 5px; color: #333; }
+            .time { text-align: center; color: #888; font-size: 0.9em; margin-bottom: 20px; }
+            
+            table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+            th { background: #f8f9fa; color: #444; font-weight: 600; padding: 15px 10px; border-bottom: 2px solid #eee; text-align: center; font-size: 0.9em; }
+            td { padding: 15px 10px; text-align: center; border-bottom: 1px solid #eee; font-size: 1.1em; font-weight: 500; }
+            
+            /* 状态颜色 */
+            .trend { font-size: 0.8em; margin-left: 5px; }
+            
+            /* 链接样式 */
+            a { color: #0066cc; text-decoration: none; font-weight: bold; font-size: 0.9em; border: 1px solid #cce5ff; padding: 4px 8px; border-radius: 4px; background: #f0f7ff; }
+            a:hover { background: #e0efff; }
+
+            /* 响应式优化 */
+            @media (max-width: 768px) {
+                .container { padding: 10px; }
+                th, td { padding: 10px 5px; font-size: 0.9em; }
+            }
         </style>
     </head>
     <body>
-        <h1>🌩️ 全球宏观监测哨</h1>
-        <div class="time">最后更新 (北京时间): 2026-03-01 01:15:37</div>
-
-        <div class="card">
-            <h3>📊 核心指标看板</h3>
+        <div class="container">
+            <h1>⛏️ 极简金矿</h1>
+            <div class="time">更新时间: 2026-03-01 02:35</div>
+            
             <table>
-                <tr><th>指标</th><th>当前值</th><th>昨收</th><th>状态</th></tr>
-                <tr><td>🇺🇸 10年美债 (US10Y)</td><td class="value">3.96%</td><td>4.02%</td><td>⬇️</td></tr>
-                <tr><td>💵 美元指数 (DXY)</td><td class="value">97.61</td><td>97.79</td><td>⬇️</td></tr>
-                <tr><td>😱 恐慌指数 (VIX)</td><td class="value">19.86</td><td>18.63</td><td>⬆️</td></tr>
-                <tr><td>🏦 高收益债 (HYG)</td><td class="value">$80.72</td><td>$80.85</td><td>⬇️</td></tr>
-                <tr><td>🇨🇳 离岸人民币 (CNH)</td><td class="value">0</td><td>0</td><td>⬇️</td></tr>
-                <tr><td>🪙 比特币 (BTC)</td><td class="value">$65030.75</td><td>$65881.8</td><td>⬇️</td></tr>
+                <thead>
+                    <tr>
+                        <th>US10Y<br><span style="font-size:0.8em;color:#999">美债</span></th>
+                        <th>DXY<br><span style="font-size:0.8em;color:#999">美元</span></th>
+                        <th>RRP<br><span style="font-size:0.8em;color:#999">逆回购</span></th>
+                        <th>VIX<br><span style="font-size:0.8em;color:#999">恐慌</span></th>
+                        <th>HYG<br><span style="font-size:0.8em;color:#999">垃圾债</span></th>
+                        <th>MMFI<br><span style="font-size:0.8em;color:#999">宽度</span></th>
+                        <th>BTC.D<br><span style="font-size:0.8em;color:#999">市占率</span></th>
+                        <th>USDT溢价<br><span style="font-size:0.8em;color:#999">场外</span></th>
+                        <th>稳定币市值<br><span style="font-size:0.8em;color:#999">流动性</span></th>
+                        <th>北向资金<br><span style="font-size:0.8em;color:#999">外资</span></th>
+                        <th>USD/CNH<br><span style="font-size:0.8em;color:#999">汇率</span></th>
+                        <th>AH溢价<br><span style="font-size:0.8em;color:#999">估值</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>3.96%<span class="trend">🟢</span></td>
+                        <td>97.61<span class="trend">🟢</span></td>
+                        <td><a href="https://www.newyorkfed.org/markets/desk-operations/reverse-repo" target="_blank">查看</a></td>
+                        <td>19.86<span class="trend">🔴</span></td>
+                        <td>80.72<span class="trend">🟢</span></td>
+                        <td><a href="https://www.tradingview.com/symbols/MMFI/" target="_blank">查看</a></td>
+                        <td>56.2%</td>
+                        <td><a href="https://www.binance.com/en/p2p-markets/USDT/CNY" target="_blank">查看</a></td>
+                        <td>$263.6B</td>
+                        <td><a href="https://data.eastmoney.com/hsgt/index.html" target="_blank">查看</a></td>
+                        <td>6.86<span class="trend">🔴</span></td>
+                        <td>N/A</td>
+                    </tr>
+                </tbody>
             </table>
-            <p style="font-size:0.8em; color:#666;">*注：RRP逆回购与USDT溢价需手动查询</p>
         </div>
-
-        <div class="card">
-            <h3>🧠 分析师自动推演</h3>
-            <div class="signal-box">
-                ⚪ 信用市场状态正常<br><br>🟢 人民币升值，利好中国资产
-            </div>
-        </div>
-
-        <div class="footer">
-            Powered by GitHub Actions & Python | Data Source: Yahoo Finance
+        <div style="text-align:center; margin-top:20px; color:#999; font-size:0.8em;">
+            🔴 红色 = 上涨 | 🟢 绿色 = 下跌 (对于美债/VIX/DXY来说，红色往往是预警信号)
         </div>
     </body>
     </html>
