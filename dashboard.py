@@ -5,7 +5,7 @@ import io
 from datetime import datetime
 import pytz
 
-# === 1. 获取基础金融数据 (Yahoo Finance) ===
+# === 1. 获取基础金融数据 (新增白银) ===
 def get_yahoo_data():
     tickers = {
         "US10Y": "^TNX",      
@@ -13,6 +13,9 @@ def get_yahoo_data():
         "VIX": "^VIX",        
         "HYG": "HYG",         
         "USDCNH": "CNH=X",
+        "GOLD": "GC=F",       # 黄金
+        "SILVER": "SI=F",     # 白银 <--- 新增
+        "COPPER": "HG=F",     # 铜
         "AH_PREMIUM": "HSCAHPI.HK"
     }
     
@@ -36,11 +39,9 @@ def get_yahoo_data():
             data[name] = {"value": "N/A", "trend": "⚪"}
     return data
 
-# === 2. 获取加密及战术数据 (多源API) ===
+# === 2. 获取战术数据 ===
 def get_tactical_data():
     data = {}
-    
-    # --- A. 基础加密数据 ---
     # BTC.D
     try:
         url = "https://api.coingecko.com/api/v3/global"
@@ -62,36 +63,30 @@ def get_tactical_data():
         else: data['STABLE_CAP'] = "Link"
     except: data['STABLE_CAP'] = "Link"
 
-    # --- B. 战术指标自动抓取 (新增功能) ---
-    
-    # 1. 贪婪恐慌指数 (Fear & Greed)
+    # 贪婪恐慌
     try:
         r = requests.get("https://api.alternative.me/fng/", timeout=10)
         if r.status_code == 200:
             item = r.json()['data'][0]
-            # 格式: 75 (Greed)
             data['FEAR_GREED'] = f"{item['value']} ({item['value_classification']})"
         else: data['FEAR_GREED'] = "Link"
     except: data['FEAR_GREED'] = "Link"
 
-    # 2. ETH Gas Fee (使用 Beaconcha.in 公共接口)
+    # ETH Gas
     try:
         r = requests.get("https://beaconcha.in/api/v1/execution/gasnow", timeout=10)
         if r.status_code == 200:
             rapid = r.json()['data']['rapid']
-            # 转换 Gwei
             gas_val = int(rapid / 1000000000)
             data['GAS'] = f"{gas_val} Gwei"
         else: data['GAS'] = "Link"
     except: data['GAS'] = "Link"
 
-    # 3. TGA 余额 (直接读取 FRED CSV)
+    # TGA
     try:
-        # 获取最新一行数据
         csv_url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=WTREGEN"
         df = pd.read_csv(csv_url)
-        last_val = df.iloc[-1, 1] # 最后一行的数值
-        # 转换成 Billion (十亿)
+        last_val = df.iloc[-1, 1]
         data['TGA'] = f"${last_val:.0f}B"
     except: data['TGA'] = "Link"
 
@@ -101,9 +96,7 @@ def get_tactical_data():
 def generate_html(y_data, t_data):
     beijing_time = datetime.now(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M')
     
-    # 定义所有链接
     links = {
-        # 宏观
         "RRP": "https://www.newyorkfed.org/markets/desk-operations/reverse-repo",
         "MMFI": "https://www.tradingview.com/symbols/MMFI/",
         "USDT": "https://www.feixiaohao.com/data/stable",
@@ -112,29 +105,25 @@ def generate_html(y_data, t_data):
         "STABLE": "https://defillama.com/stablecoins",
         "AH": "https://quote.eastmoney.com/gb/zsHSAHP.html",
         
-        # 战术武器库
         "STH": "https://www.coinglass.com/pro/i/short-term-holder-price",
         "BLK_BTC": "https://www.coinglass.com/zh/bitcoin-etf",
         "BLK_ETH": "https://www.coinglass.com/zh/eth-etf",
         "GAS": "https://mct.xyz/gasnow",
         "STABLE_FLOW": "https://cryptoquant.com/asset/stablecoin/chart/exchange-flows/exchange-netflow-total?exchange=all_exchange&window=DAY&sma=0&ema=0&priceScale=log&metricScale=linear&chartStyle=column",
-        "STABLE_IN": "https://cryptoquant.com/asset/stablecoin/chart/exchange-flows/exchange-inflow-total?exchange=all_exchange&window=DAY&sma=0&ema=0&priceScale=log&metricScale=linear&chartStyle=column",
         "FG": "https://www.coinglass.com/zh/pro/i/FearGreedIndex",
         "TGA": "https://fred.stlouisfed.org/series/WTREGEN",
         "MVRV": "https://www.bitcoinmagazinepro.com/charts/mvrv-zscore/",
         "AHR999": "https://9992100.xyz/",
-        "PIZZA": "https://www.pizzint.watch/"
+        "PIZZA": "https://www.pizzint.watch/",
+        "FUNDING": "https://www.coinglass.com/zh/FundingRate"
     }
 
-    # 辅助函数：生成单元格内容 (有数值显示数值+链接，没数值显示查看按钮)
     def cell(value, link, label="查看"):
         if value == "Link" or value == "N/A":
             return f"<a href='{link}' target='_blank' class='btn'>{label}</a>"
         else:
-            # 有数值也加上链接，方便深入查看
             return f"<a href='{link}' target='_blank' class='val-link'>{value}</a>"
 
-    # 准备 AH 数据显示
     ah_val = y_data['AH_PREMIUM']['value']
     ah_cell = cell(ah_val, links['AH']) if ah_val != "N/A" else cell("Link", links['AH'])
 
@@ -150,30 +139,19 @@ def generate_html(y_data, t_data):
             .container {{ max-width: 1200px; margin: 0 auto; }}
             h1 {{ text-align: center; color: #1a1a1a; margin-bottom: 5px; }}
             .time {{ text-align: center; color: #888; font-size: 0.85em; margin-bottom: 20px; }}
-            
             .card {{ background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; }}
             h2 {{ font-size: 1.1em; color: #444; border-left: 4px solid #0066cc; padding-left: 10px; margin: 0 0 15px 0; }}
-            
             table {{ width: 100%; border-collapse: collapse; }}
             th {{ font-size: 0.85em; color: #666; font-weight: normal; padding: 8px 5px; border-bottom: 1px solid #eee; }}
             td {{ padding: 10px 5px; text-align: center; border-bottom: 1px solid #f5f5f5; font-size: 1em; font-weight: 500; }}
-            
-            /* 状态红绿灯 */
             .trend {{ font-size: 0.7em; margin-left: 3px; }}
-            
-            /* 按钮样式 */
             .btn {{ display: inline-block; background: #f0f7ff; color: #0066cc; padding: 4px 10px; border-radius: 4px; text-decoration: none; font-size: 0.9em; border: 1px solid #cce5ff; }}
             .btn:hover {{ background: #0066cc; color: white; }}
-            
-            /* 数值链接样式 */
             .val-link {{ color: #333; text-decoration: none; border-bottom: 1px dotted #ccc; }}
             .val-link:hover {{ color: #0066cc; border-bottom: 1px solid #0066cc; }}
-
-            /* 网格布局 (用于战术面板) */
             .grid-box {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }}
             .grid-item {{ background: #fafafa; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #eee; }}
             .grid-label {{ display: block; font-size: 0.8em; color: #888; margin-bottom: 5px; }}
-            .grid-value {{ font-weight: bold; font-size: 1.1em; color: #333; }}
         </style>
     </head>
     <body>
@@ -181,7 +159,6 @@ def generate_html(y_data, t_data):
             <h1>☢️ 金融核武库</h1>
             <div class="time">更新时间: {beijing_time}</div>
             
-            <!-- 1. 极简金矿 (宏观) -->
             <div class="card">
                 <h2>⛏️ 极简金矿 (宏观定调)</h2>
                 <div style="overflow-x: auto;">
@@ -193,7 +170,9 @@ def generate_html(y_data, t_data):
                                 <th>RRP<br>逆回购</th>
                                 <th>VIX<br>恐慌</th>
                                 <th>HYG<br>垃圾债</th>
-                                <th>MMFI<br>宽度</th>
+                                <th>黄金<br>避险</th>
+                                <th>白银<br>投机</th>
+                                <th>铜<br>复苏</th>
                                 <th>BTC.D<br>市占率</th>
                                 <th>USDT溢价<br>场外</th>
                                 <th>USD/CNH<br>汇率</th>
@@ -207,7 +186,9 @@ def generate_html(y_data, t_data):
                                 <td>{cell("Link", links['RRP'])}</td>
                                 <td>{y_data['VIX']['value']}<span class="trend">{y_data['VIX']['trend']}</span></td>
                                 <td>{y_data['HYG']['value']}<span class="trend">{y_data['HYG']['trend']}</span></td>
-                                <td>{cell("Link", links['MMFI'])}</td>
+                                <td>{y_data['GOLD']['value']}<span class="trend">{y_data['GOLD']['trend']}</span></td>
+                                <td>{y_data['SILVER']['value']}<span class="trend">{y_data['SILVER']['trend']}</span></td>
+                                <td>{y_data['COPPER']['value']}<span class="trend">{y_data['COPPER']['trend']}</span></td>
                                 <td>{cell(t_data['BTC.D'], links['BTCD'])}</td>
                                 <td>{cell("Link", links['USDT'])}</td>
                                 <td>{y_data['USDCNH']['value']}<span class="trend">{y_data['USDCNH']['trend']}</span></td>
@@ -218,11 +199,9 @@ def generate_html(y_data, t_data):
                 </div>
             </div>
 
-            <!-- 2. 战术数据 (实战) -->
             <div class="card">
                 <h2>⚔️ 战术数据 (实战信号)</h2>
                 <div class="grid-box">
-                    <!-- 能抓取的数据 -->
                     <div class="grid-item">
                         <span class="grid-label">稳定币市值</span>
                         {cell(t_data['STABLE_CAP'], links['STABLE'])}
@@ -239,8 +218,10 @@ def generate_html(y_data, t_data):
                         <span class="grid-label">ETH Gas</span>
                         {cell(t_data['GAS'], links['GAS'])}
                     </div>
-                    
-                    <!-- 纯链接数据 (反爬严重) -->
+                    <div class="grid-item">
+                        <span class="grid-label">资金费率</span>
+                        {cell("Link", links['FUNDING'])}
+                    </div>
                     <div class="grid-item">
                         <span class="grid-label">北向资金</span>
                         {cell("Link", links['NORTH'])}
@@ -258,12 +239,20 @@ def generate_html(y_data, t_data):
                         {cell("Link", links['STABLE_FLOW'])}
                     </div>
                     <div class="grid-item">
+                        <span class="grid-label">MMFI 宽度</span>
+                        {cell("Link", links['MMFI'])}
+                    </div>
+                    <div class="grid-item">
                         <span class="grid-label">MVRV 逃顶</span>
                         {cell("Link", links['MVRV'])}
                     </div>
                     <div class="grid-item">
                         <span class="grid-label">Ahr999 抄底</span>
                         {cell("Link", links['AHR999'])}
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label">披萨指数</span>
+                        {cell("Link", links['PIZZA'])}
                     </div>
                 </div>
             </div>
@@ -274,7 +263,6 @@ def generate_html(y_data, t_data):
     """
     return html
 
-# === 主程序 ===
 if __name__ == "__main__":
     print("开始任务...")
     y_data = get_yahoo_data()
