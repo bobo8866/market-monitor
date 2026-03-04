@@ -89,13 +89,8 @@ def generate_html(y_data, c_data):
     stable_val = c_data.get('STABLE_CAP', 'Link')
     stable_display = f"<a href='{links['STABLE_LINK']}' target='_blank'>查看</a>" if stable_val == "Link" else stable_val
 
-    # AH溢价逻辑：如果有数据显示数据，没数据显示链接
-    ah_val = y_data['AH_PREMIUM']['value']
-    if ah_val == "N/A":
-        ah_display = f"<a href='{links['AH_LINK']}' target='_blank'>查看</a>"
-    else:
-        # 即使有数据，最好也加上链接方便点击
-        ah_display = f"<a href='{links['AH_LINK']}' target='_blank' style='background:none;border:none;color:black;text-decoration:underline;'>{ah_val}</a>"
+        # 强制显示跳转链接
+    ah_display = f"<a href='{links['AH_LINK']}' target='_blank'>点击查看</a>"
 
     html = f"""
     <!DOCTYPE html>
