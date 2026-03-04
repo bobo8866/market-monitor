@@ -77,7 +77,7 @@ def generate_html(y_data, c_data):
     links = {
         "RRP": "https://www.newyorkfed.org/markets/desk-operations/reverse-repo",
         "MMFI": "https://www.tradingview.com/symbols/MMFI/",
-        "USDT_PREMIUM": "https://www.binance.com/en/p2p-markets/USDT/CNY", # 指向币安P2P页面自行查看
+        "USDT_PREMIUM": "https://www.feixiaohao.com/data/stable.html", # 指向币安P2P页面自行查看
         "NORTH_FUNDS": "https://data.eastmoney.com/hsgt/index.html", # 东方财富北向资金
         "BTC_D_LINK": "https://www.tradingview.com/symbols/BTC.D/",
         "STABLE_LINK": "https://defillama.com/stablecoins"
