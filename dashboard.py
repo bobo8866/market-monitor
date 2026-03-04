@@ -79,7 +79,7 @@ def generate_html(y_data, c_data):
         "NORTH_FUNDS": "https://data.eastmoney.com/hsgt/index.html",
         "BTC_D_LINK": "https://www.tradingview.com/symbols/BTC.D/",
         "STABLE_LINK": "https://defillama.com/stablecoins",
-        "AH_LINK": "https://quote.eastmoney.com/gb/zsHSAHP.html" # <--- AH股溢价链接
+        "AH_LINK": "https://quote.eastmoney.com/gb/zsHSAHP.html"  
     }
 
     # 处理显示逻辑
