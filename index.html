@@ -6,94 +6,128 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>
-            body { font-family: -apple-system, system-ui, sans-serif; margin: 0; padding: 20px; background: #f0f2f5; }
+            body { font-family: -apple-system, system-ui, sans-serif; margin: 0; padding: 15px; background: #f0f2f5; }
             .container { max-width: 1200px; margin: 0 auto; }
+            h1 { text-align: center; color: #1a1a1a; margin-bottom: 5px; }
+            .time { text-align: center; color: #888; font-size: 0.85em; margin-bottom: 20px; }
             
-            /* 卡片样式 */
-            .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+            .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; }
+            h2 { font-size: 1.1em; color: #444; border-left: 4px solid #0066cc; padding-left: 10px; margin: 0 0 15px 0; }
             
-            h1 { text-align: center; margin-bottom: 5px; color: #1a1a1a; }
-            h2 { font-size: 1.2em; color: #444; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; }
-            .time { text-align: center; color: #888; font-size: 0.9em; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; }
+            th { font-size: 0.85em; color: #666; font-weight: normal; padding: 8px 5px; border-bottom: 1px solid #eee; }
+            td { padding: 10px 5px; text-align: center; border-bottom: 1px solid #f5f5f5; font-size: 1em; font-weight: 500; }
             
-            /* 表格样式 */
-            .table-box { overflow-x: auto; }
-            table { width: 100%; border-collapse: collapse; min-width: 1000px; }
-            th { background: #f8f9fa; color: #444; font-weight: 600; padding: 15px 10px; border-bottom: 2px solid #eee; text-align: center; font-size: 0.9em; }
-            td { padding: 15px 10px; text-align: center; border-bottom: 1px solid #eee; font-size: 1.1em; font-weight: 500; }
-            .trend { font-size: 0.8em; margin-left: 5px; }
+            /* 状态红绿灯 */
+            .trend { font-size: 0.7em; margin-left: 3px; }
             
-            /* 链接按钮 */
-            .link-btn { color: #0066cc; text-decoration: none; font-weight: bold; font-size: 0.9em; border: 1px solid #cce5ff; padding: 4px 8px; border-radius: 4px; background: #f0f7ff; }
-            .link-btn:hover { background: #e0efff; }
+            /* 按钮样式 */
+            .btn { display: inline-block; background: #f0f7ff; color: #0066cc; padding: 4px 10px; border-radius: 4px; text-decoration: none; font-size: 0.9em; border: 1px solid #cce5ff; }
+            .btn:hover { background: #0066cc; color: white; }
+            
+            /* 数值链接样式 */
+            .val-link { color: #333; text-decoration: none; border-bottom: 1px dotted #ccc; }
+            .val-link:hover { color: #0066cc; border-bottom: 1px solid #0066cc; }
 
-            /* 武器库网格 */
-            .arsenal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 15px; }
-            .arsenal-btn { 
-                display: block; text-align: center; text-decoration: none; 
-                background: #333; color: white; padding: 12px 5px; border-radius: 8px; 
-                font-size: 0.9em; transition: transform 0.2s; 
-            }
-            .arsenal-btn:hover { transform: translateY(-2px); background: #000; }
+            /* 网格布局 (用于战术面板) */
+            .grid-box { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+            .grid-item { background: #fafafa; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #eee; }
+            .grid-label { display: block; font-size: 0.8em; color: #888; margin-bottom: 5px; }
+            .grid-value { font-weight: bold; font-size: 1.1em; color: #333; }
         </style>
     </head>
     <body>
         <div class="container">
             <h1>☢️ 金融核武库</h1>
-            <div class="time">更新时间: 2026-03-05 00:57</div>
+            <div class="time">更新时间: 2026-03-05 01:05</div>
             
-            <!-- 核心数据看板 -->
+            <!-- 1. 极简金矿 (宏观) -->
             <div class="card">
-                <h2>📊 核心宏观指标</h2>
-                <div class="table-box">
-                    <table>
+                <h2>⛏️ 极简金矿 (宏观定调)</h2>
+                <div style="overflow-x: auto;">
+                    <table style="min-width: 800px;">
                         <thead>
                             <tr>
-                                <th>US10Y<br><span style="font-size:0.8em;color:#999">美债</span></th>
-                                <th>DXY<br><span style="font-size:0.8em;color:#999">美元</span></th>
-                                <th>RRP<br><span style="font-size:0.8em;color:#999">逆回购</span></th>
-                                <th>VIX<br><span style="font-size:0.8em;color:#999">恐慌</span></th>
-                                <th>HYG<br><span style="font-size:0.8em;color:#999">垃圾债</span></th>
-                                <th>MMFI<br><span style="font-size:0.8em;color:#999">宽度</span></th>
-                                <th>BTC.D<br><span style="font-size:0.8em;color:#999">市占率</span></th>
-                                <th>USDT溢价<br><span style="font-size:0.8em;color:#999">场外</span></th>
-                                <th>稳定币市值<br><span style="font-size:0.8em;color:#999">流动性</span></th>
-                                <th>北向资金<br><span style="font-size:0.8em;color:#999">外资</span></th>
-                                <th>USD/CNH<br><span style="font-size:0.8em;color:#999">汇率</span></th>
-                                <th>AH溢价<br><span style="font-size:0.8em;color:#999">估值</span></th>
+                                <th>US10Y<br>美债</th>
+                                <th>DXY<br>美元</th>
+                                <th>RRP<br>逆回购</th>
+                                <th>VIX<br>恐慌</th>
+                                <th>HYG<br>垃圾债</th>
+                                <th>MMFI<br>宽度</th>
+                                <th>BTC.D<br>市占率</th>
+                                <th>USDT溢价<br>场外</th>
+                                <th>USD/CNH<br>汇率</th>
+                                <th>AH溢价<br>估值</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td>4.07%<span class="trend">🔴</span></td>
-                                <td>98.78<span class="trend">🟢</span></td>
-                                <td><a href="https://www.newyorkfed.org/markets/desk-operations/reverse-repo" target="_blank" class="link-btn">查看</a></td>
-                                <td>20.74<span class="trend">🟢</span></td>
-                                <td>80.40<span class="trend">🔴</span></td>
-                                <td><a href="https://www.tradingview.com/symbols/MMFI/" target="_blank" class="link-btn">查看</a></td>
-                                <td>57.4%</td>
-                                <td><a href="https://www.feixiaohao.com/data/stable " target="_blank" class="link-btn">查看</a></td>
-                                <td>$265.1B</td>
-                                <td><a href="https://data.eastmoney.com/hsgt/index.html" target="_blank" class="link-btn">查看</a></td>
+                                <td>98.79<span class="trend">🟢</span></td>
+                                <td><a href='https://www.newyorkfed.org/markets/desk-operations/reverse-repo' target='_blank' class='btn'>查看</a></td>
+                                <td>20.71<span class="trend">🟢</span></td>
+                                <td>80.39<span class="trend">🔴</span></td>
+                                <td><a href='https://www.tradingview.com/symbols/MMFI/' target='_blank' class='btn'>查看</a></td>
+                                <td><a href='https://www.tradingview.com/symbols/BTC.D/' target='_blank' class='val-link'>57.5%</a></td>
+                                <td><a href='https://www.feixiaohao.com/data/stable' target='_blank' class='btn'>查看</a></td>
                                 <td>6.89<span class="trend">🟢</span></td>
-                                <td><a href='https://quote.eastmoney.com/gb/zsHSAHP.html' target='_blank'>点击查看</a></td>
+                                <td><a href='https://quote.eastmoney.com/gb/zsHSAHP.html' target='_blank' class='btn'>查看</a></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- 深度分析工具箱 -->
+            <!-- 2. 战术数据 (实战) -->
             <div class="card">
-                <h2>🛠️ 深度战术工具箱</h2>
-                <div class="arsenal-grid">
-                    <a href="https://www.coinglass.com/pro/i/short-term-holder-price" target="_blank" class="arsenal-btn">📊 短手成本 (STH)</a><a href="https://www.coinglass.com/zh/bitcoin-etf" target="_blank" class="arsenal-btn">🇺🇸 贝莱德 BTC</a><a href="https://www.coinglass.com/zh/eth-etf" target="_blank" class="arsenal-btn">🔷 贝莱德 ETH</a><a href="https://mct.xyz/gasnow" target="_blank" class="arsenal-btn">⛽ Gas 费率</a><a href="https://cryptoquant.com/asset/stablecoin/chart/exchange-flows/exchange-netflow-total?exchange=all_exchange&window=DAY&sma=0&ema=0&priceScale=log&metricScale=linear&chartStyle=column" target="_blank" class="arsenal-btn">🌊 稳定币流向</a><a href="https://cryptoquant.com/asset/stablecoin/chart/exchange-flows/exchange-inflow-total?exchange=all_exchange&window=DAY&sma=0&ema=0&priceScale=log&metricScale=linear&chartStyle=column" target="_blank" class="arsenal-btn">📥 稳定币流入</a><a href="https://www.coinglass.com/zh/pro/i/FearGreedIndex" target="_blank" class="arsenal-btn">😨 贪婪恐惧</a><a href="https://fred.stlouisfed.org/series/WTREGEN" target="_blank" class="arsenal-btn">🏦 TGA 余额</a><a href="https://www.bitcoinmagazinepro.com/charts/mvrv-zscore/" target="_blank" class="arsenal-btn">📈 MVRV 逃顶</a><a href="https://9992100.xyz/" target="_blank" class="arsenal-btn">🎯 Ahr999 抄底</a><a href="https://www.pizzint.watch/" target="_blank" class="arsenal-btn">🍕 披萨指数</a>
+                <h2>⚔️ 战术数据 (实战信号)</h2>
+                <div class="grid-box">
+                    <!-- 能抓取的数据 -->
+                    <div class="grid-item">
+                        <span class="grid-label">稳定币市值</span>
+                        <a href='https://defillama.com/stablecoins' target='_blank' class='val-link'>$265.1B</a>
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label">TGA 余额</span>
+                        <a href='https://fred.stlouisfed.org/series/WTREGEN' target='_blank' class='val-link'>$887612B</a>
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label">贪婪恐慌</span>
+                        <a href='https://www.coinglass.com/zh/pro/i/FearGreedIndex' target='_blank' class='val-link'>10 (Extreme Fear)</a>
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label">ETH Gas</span>
+                        <a href='https://mct.xyz/gasnow' target='_blank' class='btn'>查看</a>
+                    </div>
+                    
+                    <!-- 纯链接数据 (反爬严重) -->
+                    <div class="grid-item">
+                        <span class="grid-label">北向资金</span>
+                        <a href='https://data.eastmoney.com/hsgt/index.html' target='_blank' class='btn'>查看</a>
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label">贝莱德 BTC</span>
+                        <a href='https://www.coinglass.com/zh/bitcoin-etf' target='_blank' class='btn'>查看</a>
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label">短期持有成本</span>
+                        <a href='https://www.coinglass.com/pro/i/short-term-holder-price' target='_blank' class='btn'>查看</a>
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label">稳定币流向</span>
+                        <a href='https://cryptoquant.com/asset/stablecoin/chart/exchange-flows/exchange-netflow-total?exchange=all_exchange&window=DAY&sma=0&ema=0&priceScale=log&metricScale=linear&chartStyle=column' target='_blank' class='btn'>查看</a>
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label">MVRV 逃顶</span>
+                        <a href='https://www.bitcoinmagazinepro.com/charts/mvrv-zscore/' target='_blank' class='btn'>查看</a>
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label">Ahr999 抄底</span>
+                        <a href='https://9992100.xyz/' target='_blank' class='btn'>查看</a>
+                    </div>
                 </div>
             </div>
             
-            <div style="text-align:center; color:#999; font-size:0.8em; margin-bottom:20px;">
-                Designed for Alpha Hunters
-            </div>
         </div>
     </body>
     </html>
