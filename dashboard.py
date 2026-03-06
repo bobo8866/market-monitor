@@ -7,7 +7,7 @@ import pytz
 
 HISTORY_FILE = "history.csv"
 
-# === 1. 获取纯净数据 ===
+# === 1. 获取数据 ===
 def get_all_data():
     tickers = {
         "US10Y": "^TNX", "DXY": "DX-Y.NYB", "VIX": "^VIX", "HYG": "HYG",
@@ -15,7 +15,7 @@ def get_all_data():
     }
     raw_data = {}
     
-    # A. Yahoo
+    # Yahoo
     for name, ticker in tickers.items():
         try:
             stock = yf.Ticker(ticker)
@@ -31,18 +31,18 @@ def get_all_data():
         except: 
             raw_data[name] = {"value": "N/A", "trend": "⚪"}
 
-    # B. FRED
+    # FRED
     try:
         df = pd.read_csv("https://fred.stlouisfed.org/graph/fredgraph.csv?id=WTREGEN")
         raw_data['TGA'] = f"${df.iloc[-1, 1]:.0f}B"
-    except: raw_data['TGA'] = "N/A"
+    except: raw_data['TGA'] = "Link"
 
     try:
         df = pd.read_csv("https://fred.stlouisfed.org/graph/fredgraph.csv?id=RRPONTSYD")
         raw_data['RRP'] = f"${df.iloc[-1, 1]:.0f}B"
-    except: raw_data['RRP'] = "N/A"
+    except: raw_data['RRP'] = "Link"
 
-    # C. Crypto
+    # Crypto
     try:
         r = requests.get("https://api.coingecko.com/api/v3/global", timeout=10)
         btc_d = r.json()['data']['market_cap_percentage']['btc']
@@ -71,13 +71,12 @@ def update_history(data):
     def get_val(key):
         if key not in data: return ""
         val = data[key]['value'] if isinstance(data[key], dict) else data[key]
-        return val if val != "N/A" else ""
+        return val if val != "N/A" and val != "Link" else ""
 
-    # 排序逻辑 (加入了 CN10Y 的列，虽然是手动填，但占个位)
     new_row = {
         "日期": today,
         "US10Y": get_val('US10Y'),
-        "CN10Y": "", # <--- 给中国国债留个空位，方便你以后手动补或者看链接
+        "CN10Y": "", # 占位
         "DXY": get_val('DXY'),
         "RRP": get_val('RRP'),
         "VIX": get_val('VIX'),
@@ -94,7 +93,9 @@ def update_history(data):
     
     if os.path.exists(HISTORY_FILE):
         df = pd.read_csv(HISTORY_FILE)
-        df = df.reindex(columns=new_row.keys())
+        # 自动补齐新列
+        for col in new_row.keys():
+            if col not in df.columns: df[col] = ""
         df = df[df["日期"] != today]
     else:
         df = pd.DataFrame(columns=new_row.keys())
@@ -110,17 +111,32 @@ def generate_html(current_data, history_df):
     beijing_time = datetime.now(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M')
     history_html = history_df.head(60).to_html(index=False, classes="history-table", border=0)
     
-    # --- 核心链接 ---
+    # --- 完整链接库 (防崩溃) ---
     links = {
-        "CN10Y": "https://cn.investing.com/rates-bonds/china-10-year-bond-yield", # <--- 中国国债
+        "CN10Y": "https://cn.investing.com/rates-bonds/china-10-year-bond-yield",
+        "RRP": "https://www.newyorkfed.org/markets/desk-operations/reverse-repo", # 备用
+        "TGA": "https://fred.stlouisfed.org/series/WTREGEN", # 备用
         "USDT": "https://www.feixiaohao.com/data/stable"
     }
 
-    def cell(val, link, label="查看"):
+    def cell(val, link=None, label="查看"):
         if isinstance(val, dict): val = val['value']
+        # 如果是 N/A 或 Link，显示按钮
         if val == "N/A" or val == "Link" or val == "": 
-            return f"<a href='{link}' target='_blank' class='btn'>{label}</a>"
-        return f"<a href='{link}' target='_blank' class='val-link'>{val}</a>"
+            target_link = link if link else "#"
+            return f"<a href='{target_link}' target='_blank' class='btn'>{label}</a>"
+        # 否则显示数值
+        return f"<span class='val'>{val}</span>"
+
+    # 处理 RRP 显示 (如果抓取失败，回退到链接)
+    rrp_val = current_data.get('RRP', 'Link')
+    if rrp_val == "Link": rrp_display = cell("Link", links['RRP'])
+    else: rrp_display = rrp_val
+
+    # 处理 TGA 显示
+    tga_val = current_data.get('TGA', 'Link')
+    if tga_val == "Link": tga_display = cell("Link", links['TGA'])
+    else: tga_display = tga_val
 
     html = f"""
     <!DOCTYPE html>
@@ -143,7 +159,7 @@ def generate_html(current_data, history_df):
             
             .trend {{ font-size:0.7em; margin-left:3px; }}
             .btn {{ background:#eef; color:#0066cc; padding:2px 8px; border-radius:4px; text-decoration:none; font-size:0.9em; border:1px solid #cce5ff; }}
-            .val-link {{ color:#333; text-decoration:none; }}
+            .val {{ color:#333; }}
         </style>
     </head>
     <body>
@@ -153,13 +169,13 @@ def generate_html(current_data, history_df):
             
             <!-- 实时看板 -->
             <div class="card">
-                <h2>⚡ 实时快照 (Realtime)</h2>
+                <h2>⚡ 实时快照</h2>
                 <div style="overflow-x:auto;">
                     <table>
                         <thead>
                             <tr>
                                 <th>US10Y<br>美债</th>
-                                <th>CN10Y<br>中债</th> <!-- 新增 -->
+                                <th>CN10Y<br>中债</th>
                                 <th>DXY<br>美元</th>
                                 <th>RRP<br>逆回购</th>
                                 <th>VIX<br>恐慌</th>
@@ -171,9 +187,9 @@ def generate_html(current_data, history_df):
                         <tbody>
                             <tr>
                                 <td>{current_data['US10Y']['value']}<span class="trend">{current_data['US10Y']['trend']}</span></td>
-                                <td>{cell("Link", links['CN10Y'])}</td> <!-- 链接 -->
+                                <td>{cell("Link", links['CN10Y'])}</td>
                                 <td>{current_data['DXY']['value']}<span class="trend">{current_data['DXY']['trend']}</span></td>
-                                <td>{current_data['RRP']}</td>
+                                <td>{rrp_display}</td>
                                 <td>{current_data['VIX']['value']}<span class="trend">{current_data['VIX']['trend']}</span></td>
                                 <td>{current_data['HYG']['value']}<span class="trend">{current_data['HYG']['trend']}</span></td>
                                 <td>{current_data['GOLD']['value']}<span class="trend">{current_data['GOLD']['trend']}</span></td>
@@ -181,7 +197,7 @@ def generate_html(current_data, history_df):
                                 <td>{current_data['COPPER']['value']}<span class="trend">{current_data['COPPER']['trend']}</span></td>
                                 <td>{current_data['BTC.D']}</td>
                                 <td>{current_data['STABLE_CAP']}</td>
-                                <td>{current_data['TGA']}</td>
+                                <td>{tga_display}</td>
                                 <td>{current_data['FEAR']}</td>
                                 <td>{current_data['USDCNH']['value']}<span class="trend">{current_data['USDCNH']['trend']}</span></td>
                             </tr>
