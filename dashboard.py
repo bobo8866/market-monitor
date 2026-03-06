@@ -1,198 +1,189 @@
 import yfinance as yf
 import pandas as pd
 import requests
-import io
+import os
 from datetime import datetime
 import pytz
 
-# === 1. 获取基础金融数据 (新增白银) ===
-def get_yahoo_data():
+HISTORY_FILE = "history.csv"
+
+# === 1. 获取纯净数据 ===
+def get_all_data():
     tickers = {
-        "US10Y": "^TNX",      
-        "DXY": "DX-Y.NYB",    
-        "VIX": "^VIX",        
-        "HYG": "HYG",         
-        "USDCNH": "CNH=X",
-        "GOLD": "GC=F",       # 黄金
-        "SILVER": "SI=F",     # 白银 <--- 新增
-        "COPPER": "HG=F",     # 铜
-        "AH_PREMIUM": "HSCAHPI.HK"
+        "US10Y": "^TNX", "DXY": "DX-Y.NYB", "VIX": "^VIX", "HYG": "HYG",
+        "USDCNH": "CNH=X", "GOLD": "GC=F", "SILVER": "SI=F", "COPPER": "HG=F"
     }
+    raw_data = {}
     
-    data = {}
+    # A. Yahoo
     for name, ticker in tickers.items():
         try:
             stock = yf.Ticker(ticker)
             price = stock.fast_info['last_price']
-            prev_close = stock.fast_info['previous_close']
+            prev = stock.fast_info['previous_close']
+            if name == "US10Y": val_str = f"{price:.2f}%"
+            else: val_str = f"{price:.2f}"
             
-            if name == "US10Y":
-                fmt_price = f"{price:.2f}%"
-            else:
-                fmt_price = f"{price:.2f}"
-                
-            data[name] = {
-                "value": fmt_price,
-                "trend": "🔴" if price > prev_close else "🟢" if price < prev_close else "⚪"
+            raw_data[name] = {
+                "value": val_str,
+                "trend": "🔴" if price > prev else "🟢" if price < prev else "⚪"
             }
-        except:
-            data[name] = {"value": "N/A", "trend": "⚪"}
-    return data
+        except: 
+            raw_data[name] = {"value": "N/A", "trend": "⚪"}
 
-# === 2. 获取战术数据 ===
-def get_tactical_data():
-    data = {}
-    # BTC.D
+    # B. FRED
     try:
-        url = "https://api.coingecko.com/api/v3/global"
-        r = requests.get(url, timeout=10)
-        if r.status_code == 200:
-            val = r.json()['data']['market_cap_percentage']['btc']
-            data['BTC.D'] = f"{val:.1f}%"
-        else: data['BTC.D'] = "Link"
-    except: data['BTC.D'] = "Link"
+        df = pd.read_csv("https://fred.stlouisfed.org/graph/fredgraph.csv?id=WTREGEN")
+        raw_data['TGA'] = f"${df.iloc[-1, 1]:.0f}B"
+    except: raw_data['TGA'] = "N/A"
 
-    # 稳定币市值
     try:
-        url = "https://stablecoins.llama.fi/stablecoins?includePrices=true"
-        r = requests.get(url, timeout=10)
-        if r.status_code == 200:
-            assets = r.json()['peggedAssets']
-            total = sum(a['circulating']['peggedUSD'] for a in assets if a['symbol'] in ['USDT','USDC','DAI','FDUSD'])
-            data['STABLE_CAP'] = f"${total/1e9:.1f}B"
-        else: data['STABLE_CAP'] = "Link"
-    except: data['STABLE_CAP'] = "Link"
+        df = pd.read_csv("https://fred.stlouisfed.org/graph/fredgraph.csv?id=RRPONTSYD")
+        raw_data['RRP'] = f"${df.iloc[-1, 1]:.0f}B"
+    except: raw_data['RRP'] = "N/A"
 
-    # 贪婪恐慌
+    # C. Crypto
+    try:
+        r = requests.get("https://api.coingecko.com/api/v3/global", timeout=10)
+        btc_d = r.json()['data']['market_cap_percentage']['btc']
+        raw_data['BTC.D'] = f"{btc_d:.1f}%"
+    except: raw_data['BTC.D'] = "N/A"
+
+    try:
+        r = requests.get("https://stablecoins.llama.fi/stablecoins?includePrices=true", timeout=10)
+        assets = r.json()['peggedAssets']
+        total = sum(a['circulating']['peggedUSD'] for a in assets if a['symbol'] in ['USDT','USDC','DAI','FDUSD'])
+        raw_data['STABLE_CAP'] = f"${total/1e9:.1f}B"
+    except: raw_data['STABLE_CAP'] = "N/A"
+    
     try:
         r = requests.get("https://api.alternative.me/fng/", timeout=10)
-        if r.status_code == 200:
-            item = r.json()['data'][0]
-            data['FEAR_GREED'] = f"{item['value']} ({item['value_classification']})"
-        else: data['FEAR_GREED'] = "Link"
-    except: data['FEAR_GREED'] = "Link"
+        item = r.json()['data'][0]
+        raw_data['FEAR'] = f"{item['value']}"
+    except: raw_data['FEAR'] = "N/A"
 
-    # ETH Gas
-    try:
-        r = requests.get("https://beaconcha.in/api/v1/execution/gasnow", timeout=10)
-        if r.status_code == 200:
-            rapid = r.json()['data']['rapid']
-            gas_val = int(rapid / 1000000000)
-            data['GAS'] = f"{gas_val} Gwei"
-        else: data['GAS'] = "Link"
-    except: data['GAS'] = "Link"
+    return raw_data
 
-    # TGA
-    try:
-        csv_url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=WTREGEN"
-        df = pd.read_csv(csv_url)
-        last_val = df.iloc[-1, 1]
-        data['TGA'] = f"${last_val:.0f}B"
-    except: data['TGA'] = "Link"
+# === 2. 更新历史 ===
+def update_history(data):
+    today = datetime.now(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d')
+    
+    def get_val(key):
+        if key not in data: return ""
+        val = data[key]['value'] if isinstance(data[key], dict) else data[key]
+        return val if val != "N/A" else ""
 
-    return data
+    # 排序逻辑 (加入了 CN10Y 的列，虽然是手动填，但占个位)
+    new_row = {
+        "日期": today,
+        "US10Y": get_val('US10Y'),
+        "CN10Y": "", # <--- 给中国国债留个空位，方便你以后手动补或者看链接
+        "DXY": get_val('DXY'),
+        "RRP": get_val('RRP'),
+        "VIX": get_val('VIX'),
+        "HYG": get_val('HYG'),
+        "黄金": get_val('GOLD'),
+        "白银": get_val('SILVER'),
+        "铜": get_val('COPPER'),
+        "BTC.D": data['BTC.D'],
+        "稳定币": data['STABLE_CAP'],
+        "TGA": data['TGA'],
+        "恐慌": data['FEAR'],
+        "汇率": get_val('USDCNH')
+    }
+    
+    if os.path.exists(HISTORY_FILE):
+        df = pd.read_csv(HISTORY_FILE)
+        df = df.reindex(columns=new_row.keys())
+        df = df[df["日期"] != today]
+    else:
+        df = pd.DataFrame(columns=new_row.keys())
+    
+    new_df = pd.DataFrame([new_row])
+    df = pd.concat([df, new_df], ignore_index=True)
+    df = df.sort_values(by="日期", ascending=False)
+    df.to_csv(HISTORY_FILE, index=False, encoding="utf-8-sig")
+    return df
 
 # === 3. 生成 HTML ===
-def generate_html(y_data, t_data):
+def generate_html(current_data, history_df):
     beijing_time = datetime.now(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M')
+    history_html = history_df.head(60).to_html(index=False, classes="history-table", border=0)
     
+    # --- 核心链接 ---
     links = {
-        "RRP": "https://www.newyorkfed.org/markets/desk-operations/reverse-repo",
-        "MMFI": "https://www.tradingview.com/symbols/MMFI/",
-        "USDT": "https://www.feixiaohao.com/data/stable",
-        "NORTH": "https://data.eastmoney.com/hsgt/index.html",
-        "BTCD": "https://www.tradingview.com/symbols/BTC.D/",
-        "STABLE": "https://defillama.com/stablecoins",
-        "AH": "https://quote.eastmoney.com/gb/zsHSAHP.html",
-        
-        "STH": "https://www.coinglass.com/pro/i/short-term-holder-price",
-        "BLK_BTC": "https://www.coinglass.com/zh/bitcoin-etf",
-        "BLK_ETH": "https://www.coinglass.com/zh/eth-etf",
-        "GAS": "https://mct.xyz/gasnow",
-        "STABLE_FLOW": "https://cryptoquant.com/asset/stablecoin/chart/exchange-flows/exchange-netflow-total?exchange=all_exchange&window=DAY&sma=0&ema=0&priceScale=log&metricScale=linear&chartStyle=column",
-        "FG": "https://www.coinglass.com/zh/pro/i/FearGreedIndex",
-        "TGA": "https://fred.stlouisfed.org/series/WTREGEN",
-        "MVRV": "https://www.bitcoinmagazinepro.com/charts/mvrv-zscore/",
-        "AHR999": "https://9992100.xyz/",
-        "PIZZA": "https://www.pizzint.watch/",
-        "FUNDING": "https://www.coinglass.com/zh/FundingRate"
+        "CN10Y": "https://cn.investing.com/rates-bonds/china-10-year-bond-yield", # <--- 中国国债
+        "USDT": "https://www.feixiaohao.com/data/stable"
     }
 
-    def cell(value, link, label="查看"):
-        if value == "Link" or value == "N/A":
+    def cell(val, link, label="查看"):
+        if isinstance(val, dict): val = val['value']
+        if val == "N/A" or val == "Link" or val == "": 
             return f"<a href='{link}' target='_blank' class='btn'>{label}</a>"
-        else:
-            return f"<a href='{link}' target='_blank' class='val-link'>{value}</a>"
-
-    ah_val = y_data['AH_PREMIUM']['value']
-    ah_cell = cell(ah_val, links['AH']) if ah_val != "N/A" else cell("Link", links['AH'])
+        return f"<a href='{link}' target='_blank' class='val-link'>{val}</a>"
 
     html = f"""
     <!DOCTYPE html>
     <html>
     <head>
-        <title>金融核武库</title>
+        <title>秘密档案馆</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>
-            body {{ font-family: -apple-system, system-ui, sans-serif; margin: 0; padding: 15px; background: #f0f2f5; }}
-            .container {{ max-width: 1200px; margin: 0 auto; }}
-            h1 {{ text-align: center; color: #1a1a1a; margin-bottom: 5px; }}
-            .time {{ text-align: center; color: #888; font-size: 0.85em; margin-bottom: 20px; }}
-            .card {{ background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; }}
-            h2 {{ font-size: 1.1em; color: #444; border-left: 4px solid #0066cc; padding-left: 10px; margin: 0 0 15px 0; }}
-            table {{ width: 100%; border-collapse: collapse; }}
-            th {{ font-size: 0.85em; color: #666; font-weight: normal; padding: 8px 5px; border-bottom: 1px solid #eee; }}
-            td {{ padding: 10px 5px; text-align: center; border-bottom: 1px solid #f5f5f5; font-size: 1em; font-weight: 500; }}
-            .trend {{ font-size: 0.7em; margin-left: 3px; }}
-            .btn {{ display: inline-block; background: #f0f7ff; color: #0066cc; padding: 4px 10px; border-radius: 4px; text-decoration: none; font-size: 0.9em; border: 1px solid #cce5ff; }}
-            .btn:hover {{ background: #0066cc; color: white; }}
-            .val-link {{ color: #333; text-decoration: none; border-bottom: 1px dotted #ccc; }}
-            .val-link:hover {{ color: #0066cc; border-bottom: 1px solid #0066cc; }}
-            .grid-box {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }}
-            .grid-item {{ background: #fafafa; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #eee; }}
-            .grid-label {{ display: block; font-size: 0.8em; color: #888; margin-bottom: 5px; }}
+            body {{ font-family: sans-serif; margin:0; padding:15px; background:#f0f2f5; }}
+            .container {{ max-width: 1200px; margin:0 auto; }}
+            h1 {{ text-align:center; color:#333; margin-bottom:5px; }}
+            .time {{ text-align:center; color:#888; font-size:0.9em; margin-bottom:20px; }}
+            .card {{ background:white; padding:15px; border-radius:10px; margin-bottom:20px; box-shadow:0 2px 5px rgba(0,0,0,0.05); }}
+            
+            table {{ width:100%; border-collapse:collapse; min-width:900px; white-space:nowrap; }}
+            th {{ background:#333; color:white; padding:10px; text-align:center; font-size:0.9em; }}
+            td {{ padding:10px; text-align:center; font-weight:bold; border-bottom:1px solid #eee; }}
+            tr:nth-child(even) {{ background-color:#f9f9f9; }}
+            
+            .trend {{ font-size:0.7em; margin-left:3px; }}
+            .btn {{ background:#eef; color:#0066cc; padding:2px 8px; border-radius:4px; text-decoration:none; font-size:0.9em; border:1px solid #cce5ff; }}
+            .val-link {{ color:#333; text-decoration:none; }}
         </style>
     </head>
     <body>
         <div class="container">
-            <h1>☢️ 金融核武库</h1>
+            <h1>📂 每日金融档案</h1>
             <div class="time">更新时间: {beijing_time}</div>
             
+            <!-- 实时看板 -->
             <div class="card">
-                <h2>⛏️ 极简金矿 (宏观定调)</h2>
-                <div style="overflow-x: auto;">
-                    <table style="min-width: 800px;">
+                <h2>⚡ 实时快照 (Realtime)</h2>
+                <div style="overflow-x:auto;">
+                    <table>
                         <thead>
                             <tr>
                                 <th>US10Y<br>美债</th>
+                                <th>CN10Y<br>中债</th> <!-- 新增 -->
                                 <th>DXY<br>美元</th>
                                 <th>RRP<br>逆回购</th>
                                 <th>VIX<br>恐慌</th>
                                 <th>HYG<br>垃圾债</th>
-                                <th>黄金<br>避险</th>
-                                <th>白银<br>投机</th>
-                                <th>铜<br>复苏</th>
-                                <th>BTC.D<br>市占率</th>
-                                <th>USDT溢价<br>场外</th>
-                                <th>USD/CNH<br>汇率</th>
-                                <th>AH溢价<br>估值</th>
+                                <th>黄金</th><th>白银</th><th>铜</th>
+                                <th>BTC.D</th><th>稳定币</th><th>TGA</th><th>恐慌</th><th>汇率</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{y_data['US10Y']['value']}<span class="trend">{y_data['US10Y']['trend']}</span></td>
-                                <td>{y_data['DXY']['value']}<span class="trend">{y_data['DXY']['trend']}</span></td>
-                                <td>{cell("Link", links['RRP'])}</td>
-                                <td>{y_data['VIX']['value']}<span class="trend">{y_data['VIX']['trend']}</span></td>
-                                <td>{y_data['HYG']['value']}<span class="trend">{y_data['HYG']['trend']}</span></td>
-                                <td>{y_data['GOLD']['value']}<span class="trend">{y_data['GOLD']['trend']}</span></td>
-                                <td>{y_data['SILVER']['value']}<span class="trend">{y_data['SILVER']['trend']}</span></td>
-                                <td>{y_data['COPPER']['value']}<span class="trend">{y_data['COPPER']['trend']}</span></td>
-                                <td>{cell(t_data['BTC.D'], links['BTCD'])}</td>
-                                <td>{cell("Link", links['USDT'])}</td>
-                                <td>{y_data['USDCNH']['value']}<span class="trend">{y_data['USDCNH']['trend']}</span></td>
-                                <td>{ah_cell}</td>
+                                <td>{current_data['US10Y']['value']}<span class="trend">{current_data['US10Y']['trend']}</span></td>
+                                <td>{cell("Link", links['CN10Y'])}</td> <!-- 链接 -->
+                                <td>{current_data['DXY']['value']}<span class="trend">{current_data['DXY']['trend']}</span></td>
+                                <td>{current_data['RRP']}</td>
+                                <td>{current_data['VIX']['value']}<span class="trend">{current_data['VIX']['trend']}</span></td>
+                                <td>{current_data['HYG']['value']}<span class="trend">{current_data['HYG']['trend']}</span></td>
+                                <td>{current_data['GOLD']['value']}<span class="trend">{current_data['GOLD']['trend']}</span></td>
+                                <td>{current_data['SILVER']['value']}<span class="trend">{current_data['SILVER']['trend']}</span></td>
+                                <td>{current_data['COPPER']['value']}<span class="trend">{current_data['COPPER']['trend']}</span></td>
+                                <td>{current_data['BTC.D']}</td>
+                                <td>{current_data['STABLE_CAP']}</td>
+                                <td>{current_data['TGA']}</td>
+                                <td>{current_data['FEAR']}</td>
+                                <td>{current_data['USDCNH']['value']}<span class="trend">{current_data['USDCNH']['trend']}</span></td>
                             </tr>
                         </tbody>
                     </table>
@@ -200,63 +191,11 @@ def generate_html(y_data, t_data):
             </div>
 
             <div class="card">
-                <h2>⚔️ 战术数据 (实战信号)</h2>
-                <div class="grid-box">
-                    <div class="grid-item">
-                        <span class="grid-label">稳定币市值</span>
-                        {cell(t_data['STABLE_CAP'], links['STABLE'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">TGA 余额</span>
-                        {cell(t_data['TGA'], links['TGA'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">贪婪恐慌</span>
-                        {cell(t_data['FEAR_GREED'], links['FG'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">ETH Gas</span>
-                        {cell(t_data['GAS'], links['GAS'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">资金费率</span>
-                        {cell("Link", links['FUNDING'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">北向资金</span>
-                        {cell("Link", links['NORTH'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">贝莱德 BTC</span>
-                        {cell("Link", links['BLK_BTC'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">短期持有成本</span>
-                        {cell("Link", links['STH'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">稳定币流向</span>
-                        {cell("Link", links['STABLE_FLOW'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">MMFI 宽度</span>
-                        {cell("Link", links['MMFI'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">MVRV 逃顶</span>
-                        {cell("Link", links['MVRV'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">Ahr999 抄底</span>
-                        {cell("Link", links['AHR999'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">披萨指数</span>
-                        {cell("Link", links['PIZZA'])}
-                    </div>
+                <h2>📜 历史数据</h2>
+                <div style="overflow-x:auto;">
+                    {history_html}
                 </div>
             </div>
-            
         </div>
     </body>
     </html>
@@ -264,10 +203,9 @@ def generate_html(y_data, t_data):
     return html
 
 if __name__ == "__main__":
-    print("开始任务...")
-    y_data = get_yahoo_data()
-    t_data = get_tactical_data()
-    html = generate_html(y_data, t_data)
+    print("开始归档...")
+    data = get_all_data()
+    df = update_history(data)
     with open("index.html", "w", encoding="utf-8") as f:
-        f.write(html)
-    print("任务完成")
+        f.write(generate_html(data, df))
+    print("完成")
