@@ -97,11 +97,12 @@ def get_tactical_data():
 def generate_html(y_data, t_data):
     beijing_time = datetime.now(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M')
     
+    # --- 修复：把所有链接都补全了 ---
     links = {
         "RRP": "https://www.newyorkfed.org/markets/desk-operations/reverse-repo",
         "MMFI": "https://www.tradingview.com/symbols/MMFI/",
-        "USDT": "https://www.feixiaohao.com/data/stable",
-        "NORTH": "https://data.eastmoney.com/hsgt/index.html",
+        "USDT_PREMIUM": "https://www.feixiaohao.com/data/stable",
+        "NORTH_FUNDS": "https://data.eastmoney.com/hsgt/index.html",
         "BTC_D_LINK": "https://www.tradingview.com/symbols/BTC.D/",
         "STABLE_LINK": "https://defillama.com/stablecoins",
         "AH_LINK": "https://quote.eastmoney.com/gb/zsHSAHP.html",
@@ -117,8 +118,8 @@ def generate_html(y_data, t_data):
         "AHR999": "https://9992100.xyz/",
         "PIZZA": "https://www.pizzint.watch/",
         "FUNDING": "https://www.coinglass.com/zh/FundingRate",
-        "CB_PREM": "https://www.coinglass.com/zh/pro/i/CoinbasePremiumIndex", # <--- Coinbase 溢价
-        "CME_OI": "https://www.coinglass.com/zh/BitcoinOpenInterest"        # <--- CME 持仓
+        "CB_PREM": "https://www.coinglass.com/zh/pro/i/CoinbasePremiumIndex",
+        "CME_OI": "https://www.coinglass.com/zh/BitcoinOpenInterest"
     }
 
     def cell(val, link, label="查看"):
@@ -222,7 +223,7 @@ def generate_html(y_data, t_data):
                         {cell(t_data['GAS'], links['GAS'])}
                     </div>
                     
-                    <!-- 新增 -->
+                    <!-- 新增：华尔街雷达 -->
                     <div class="grid-item">
                         <span class="grid-label">Coinbase溢价</span>
                         {cell("Link", links['CB_PREM'])}
