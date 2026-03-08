@@ -5,7 +5,7 @@ import io
 from datetime import datetime
 import pytz
 
-# === 1. 获取基础金融数据 (新增白银) ===
+# === 1. 获取基础金融数据 ===
 def get_yahoo_data():
     tickers = {
         "US10Y": "^TNX",      
@@ -13,9 +13,9 @@ def get_yahoo_data():
         "VIX": "^VIX",        
         "HYG": "HYG",         
         "USDCNH": "CNH=X",
-        "GOLD": "GC=F",       # 黄金
-        "SILVER": "SI=F",     # 白银 <--- 新增
-        "COPPER": "HG=F",     # 铜
+        "GOLD": "GC=F",       
+        "SILVER": "SI=F",     
+        "COPPER": "HG=F",     
         "AH_PREMIUM": "HSCAHPI.HK"
     }
     
@@ -42,6 +42,7 @@ def get_yahoo_data():
 # === 2. 获取战术数据 ===
 def get_tactical_data():
     data = {}
+    
     # BTC.D
     try:
         url = "https://api.coingecko.com/api/v3/global"
@@ -101,9 +102,9 @@ def generate_html(y_data, t_data):
         "MMFI": "https://www.tradingview.com/symbols/MMFI/",
         "USDT": "https://www.feixiaohao.com/data/stable",
         "NORTH": "https://data.eastmoney.com/hsgt/index.html",
-        "BTCD": "https://www.tradingview.com/symbols/BTC.D/",
-        "STABLE": "https://defillama.com/stablecoins",
-        "AH": "https://quote.eastmoney.com/gb/zsHSAHP.html",
+        "BTC_D_LINK": "https://www.tradingview.com/symbols/BTC.D/",
+        "STABLE_LINK": "https://defillama.com/stablecoins",
+        "AH_LINK": "https://quote.eastmoney.com/gb/zsHSAHP.html",
         
         "STH": "https://www.coinglass.com/pro/i/short-term-holder-price",
         "BLK_BTC": "https://www.coinglass.com/zh/bitcoin-etf",
@@ -115,17 +116,19 @@ def generate_html(y_data, t_data):
         "MVRV": "https://www.bitcoinmagazinepro.com/charts/mvrv-zscore/",
         "AHR999": "https://9992100.xyz/",
         "PIZZA": "https://www.pizzint.watch/",
-        "FUNDING": "https://www.coinglass.com/zh/FundingRate"
+        "FUNDING": "https://www.coinglass.com/zh/FundingRate",
+        "CB_PREM": "https://www.coinglass.com/zh/pro/i/CoinbasePremiumIndex", # <--- Coinbase 溢价
+        "CME_OI": "https://www.coinglass.com/zh/BitcoinOpenInterest"        # <--- CME 持仓
     }
 
-    def cell(value, link, label="查看"):
-        if value == "Link" or value == "N/A":
+    def cell(val, link, label="查看"):
+        if val == "Link" or val == "N/A":
             return f"<a href='{link}' target='_blank' class='btn'>{label}</a>"
         else:
-            return f"<a href='{link}' target='_blank' class='val-link'>{value}</a>"
+            return f"<a href='{link}' target='_blank' class='val-link'>{val}</a>"
 
     ah_val = y_data['AH_PREMIUM']['value']
-    ah_cell = cell(ah_val, links['AH']) if ah_val != "N/A" else cell("Link", links['AH'])
+    ah_cell = cell(ah_val, links['AH_LINK']) if ah_val != "N/A" else cell("Link", links['AH_LINK'])
 
     html = f"""
     <!DOCTYPE html>
@@ -189,8 +192,8 @@ def generate_html(y_data, t_data):
                                 <td>{y_data['GOLD']['value']}<span class="trend">{y_data['GOLD']['trend']}</span></td>
                                 <td>{y_data['SILVER']['value']}<span class="trend">{y_data['SILVER']['trend']}</span></td>
                                 <td>{y_data['COPPER']['value']}<span class="trend">{y_data['COPPER']['trend']}</span></td>
-                                <td>{cell(t_data['BTC.D'], links['BTCD'])}</td>
-                                <td>{cell("Link", links['USDT'])}</td>
+                                <td>{cell(t_data['BTC.D'], links['BTC_D_LINK'])}</td>
+                                <td>{cell("Link", links['USDT_PREMIUM'])}</td>
                                 <td>{y_data['USDCNH']['value']}<span class="trend">{y_data['USDCNH']['trend']}</span></td>
                                 <td>{ah_cell}</td>
                             </tr>
@@ -204,7 +207,7 @@ def generate_html(y_data, t_data):
                 <div class="grid-box">
                     <div class="grid-item">
                         <span class="grid-label">稳定币市值</span>
-                        {cell(t_data['STABLE_CAP'], links['STABLE'])}
+                        {cell(t_data['STABLE_CAP'], links['STABLE_LINK'])}
                     </div>
                     <div class="grid-item">
                         <span class="grid-label">TGA 余额</span>
@@ -218,20 +221,35 @@ def generate_html(y_data, t_data):
                         <span class="grid-label">ETH Gas</span>
                         {cell(t_data['GAS'], links['GAS'])}
                     </div>
+                    
+                    <!-- 新增 -->
+                    <div class="grid-item">
+                        <span class="grid-label">Coinbase溢价</span>
+                        {cell("Link", links['CB_PREM'])}
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label">CME持仓</span>
+                        {cell("Link", links['CME_OI'])}
+                    </div>
+                    
                     <div class="grid-item">
                         <span class="grid-label">资金费率</span>
                         {cell("Link", links['FUNDING'])}
                     </div>
                     <div class="grid-item">
                         <span class="grid-label">北向资金</span>
-                        {cell("Link", links['NORTH'])}
+                        {cell("Link", links['NORTH_FUNDS'])}
                     </div>
                     <div class="grid-item">
                         <span class="grid-label">贝莱德 BTC</span>
                         {cell("Link", links['BLK_BTC'])}
                     </div>
                     <div class="grid-item">
-                        <span class="grid-label">短期持有成本</span>
+                        <span class="grid-label">贝莱德 ETH</span>
+                        {cell("Link", links['BLK_ETH'])}
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label">短手成本</span>
                         {cell("Link", links['STH'])}
                     </div>
                     <div class="grid-item">
