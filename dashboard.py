@@ -118,7 +118,7 @@ def generate_html(y_data, t_data):
         "AHR999": "https://9992100.xyz/",
         "PIZZA": "https://www.pizzint.watch/",
         "FUNDING": "https://www.coinglass.com/zh/FundingRate",
-        "CB_PREM": "https://www.coinglass.com/zh/pro/i/CoinbasePremiumIndex",
+        "CB_PREM": "https://cryptoquant.com/asset/btc/chart/market-data/coinbase-premium-index?window=DAY&sma=0&ema=0&priceScale=log&metricScale=linear&chartStyle=line",
         "CME_OI": "https://www.coinglass.com/zh/BitcoinOpenInterest"
     }
 
