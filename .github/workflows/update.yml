@@ -2,26 +2,34 @@ name: Update Market Dashboard
 
 on:
   schedule:
-    # 每天 UTC 时间 0点和12点自动执行 (北京时间早上8点和晚上8点)
     - cron: '0 0,12 * * *'
-  workflow_dispatch: # 允许你随时点击按钮手动执行
+  workflow_dispatch:
+
+# 加了这行，彻底消灭那个烦人的 Node.js 警告
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    # 再次在代码层面强行声明写入权限
+    permissions:
+      contents: write
+      
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4 # ✅ 修复警告：已升级到最新的 v4
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v5 # ✅ 修复警告：已升级到最新的 v5
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install requests pandas yfinance pytz # ✅ 修复报错：安装四大重型武器库
+        pip install requests pandas yfinance pytz
 
     - name: Run dashboard script
       run: python dashboard.py
