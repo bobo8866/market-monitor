@@ -126,7 +126,7 @@ def generate_html(y_data, t_data):
         "BLK_BTC": "https://www.coinglass.com/zh/bitcoin-etf",
         "BLK_ETH": "https://www.coinglass.com/zh/eth-etf",
         "STH": "https://www.coinglass.com/zh/pro/i/short-term-holder-price",
-        "MVRV": "https://www.coinglass.com/zh/pro/i/mvrv",
+        "MVRV": "https://www.bitcoinmagazinepro.com/charts/mvrv-zscore/",
         "AHR999": "https://9992100.xyz/",
         "PIZZA": "https://www.pizzint.watch/", 
         
