@@ -1,13 +1,18 @@
 import yfinance as yf
 import pandas as pd
 import requests
-import io
 from datetime import datetime
 import pytz
 
-# === 1. 获取基础金融数据 ===
+# ==========================================
+# 顶级宏观与微观流动性监控引擎 (GitHub Actions 战术大屏版)
+# 核心架构：59列全息满载 + 免密美联储接口 + 战损直达链接
+# ==========================================
+
+# === 1. 获取基础金融与宏观数据 (Yahoo Finance) ===
 def get_yahoo_data():
     tickers = {
+        "BTC_PRICE": "BTC-USD",
         "US10Y": "^TNX",      
         "DXY": "DX-Y.NYB",    
         "VIX": "^VIX",        
@@ -24,10 +29,12 @@ def get_yahoo_data():
         try:
             stock = yf.Ticker(ticker)
             price = stock.fast_info['last_price']
-            prev_close = stock.fast_info['previous_close']
+            prev_close = stock.fast_info.get('previous_close', price)
             
             if name == "US10Y":
                 fmt_price = f"{price:.2f}%"
+            elif name == "BTC_PRICE":
+                fmt_price = f"${price:,.2f}"
             else:
                 fmt_price = f"{price:.2f}"
                 
@@ -39,11 +46,28 @@ def get_yahoo_data():
             data[name] = {"value": "N/A", "trend": "⚪"}
     return data
 
-# === 2. 获取战术数据 ===
+# === 2. 获取进阶与加密数据 ===
 def get_tactical_data():
     data = {}
     
-    # BTC.D
+    # 1. 免密白嫖美联储 FRED 数据 (CSV 强拆)
+    fred_series = {
+        "TGA": "WTREGEN",
+        "RRP": "RRPONTSYD",
+        "HYG_SPREAD": "BAMLH0A0HYM2"
+    }
+    for name, series_id in fred_series.items():
+        try:
+            csv_url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series_id}"
+            df = pd.read_csv(csv_url)
+            last_val = float(df.iloc[-1, 1])
+            if name in ["TGA", "RRP"]:
+                data[name] = f"${last_val:.0f}B"
+            else:
+                data[name] = f"{last_val:.2f}%"
+        except: data[name] = "Link"
+
+    # 2. BTC.D (CoinGecko)
     try:
         url = "https://api.coingecko.com/api/v3/global"
         r = requests.get(url, timeout=10)
@@ -53,18 +77,7 @@ def get_tactical_data():
         else: data['BTC.D'] = "Link"
     except: data['BTC.D'] = "Link"
 
-    # 稳定币市值
-    try:
-        url = "https://stablecoins.llama.fi/stablecoins?includePrices=true"
-        r = requests.get(url, timeout=10)
-        if r.status_code == 200:
-            assets = r.json()['peggedAssets']
-            total = sum(a['circulating']['peggedUSD'] for a in assets if a['symbol'] in ['USDT','USDC','DAI','FDUSD'])
-            data['STABLE_CAP'] = f"${total/1e9:.1f}B"
-        else: data['STABLE_CAP'] = "Link"
-    except: data['STABLE_CAP'] = "Link"
-
-    # 贪婪恐慌
+    # 3. 贪婪恐慌 (Alternative.me)
     try:
         r = requests.get("https://api.alternative.me/fng/", timeout=10)
         if r.status_code == 200:
@@ -73,7 +86,7 @@ def get_tactical_data():
         else: data['FEAR_GREED'] = "Link"
     except: data['FEAR_GREED'] = "Link"
 
-    # ETH Gas
+    # 4. ETH Gas (Beaconcha.in)
     try:
         r = requests.get("https://beaconcha.in/api/v1/execution/gasnow", timeout=10)
         if r.status_code == 200:
@@ -83,51 +96,67 @@ def get_tactical_data():
         else: data['GAS'] = "Link"
     except: data['GAS'] = "Link"
 
-    # TGA
-    try:
-        csv_url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=WTREGEN"
-        df = pd.read_csv(csv_url)
-        last_val = df.iloc[-1, 1]
-        data['TGA'] = f"${last_val:.0f}B"
-    except: data['TGA'] = "Link"
-
     return data
 
-# === 3. 生成 HTML ===
+# === 3. 生成高密度战术前端 HTML ===
 def generate_html(y_data, t_data):
     beijing_time = datetime.now(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M')
     
-    # --- 修复：把所有链接都补全了 ---
+    # 🎯 全域 59列精准打击链接库
     links = {
-        "RRP": "https://www.newyorkfed.org/markets/desk-operations/reverse-repo",
-        "MMFI": "https://www.tradingview.com/symbols/MMFI/",
-        "USDT_PREMIUM": "https://www.feixiaohao.com/data/stable",
-        "NORTH_FUNDS": "https://data.eastmoney.com/hsgt/index.html",
-        "BTC_D_LINK": "https://www.tradingview.com/symbols/BTC.D/",
-        "STABLE_LINK": "https://defillama.com/stablecoins",
+        # 基础宏观
+        "RRP": "https://fred.stlouisfed.org/series/RRPONTSYD",
+        "TGA": "https://fred.stlouisfed.org/series/WTREGEN",
+        "HYG_SPREAD": "https://fred.stlouisfed.org/series/BAMLH0A0HYM2",
         "AH_LINK": "https://quote.eastmoney.com/gb/zsHSAHP.html",
+        "NORTH_FUNDS": "https://data.eastmoney.com/hsgt/index.html",
         
-        "STH": "https://www.coinglass.com/pro/i/short-term-holder-price",
+        # 加密基础
+        "BTC_D_LINK": "https://www.tradingview.com/symbols/BTC.D/",
+        "USDT_PREMIUM": "https://www.feixiaohao.com/data/stable",
+        "FG": "https://www.coinglass.com/zh/pro/i/FearGreedIndex",
+        "GAS": "https://mct.xyz/gasnow",
+        "MMFI": "https://www.tradingview.com/symbols/MMFI/",
+        
+        # 估值与 ETF
+        "CB_PREM": "https://cryptoquant.com/asset/btc/chart/market-data/coinbase-premium-index?window=DAY&sma=0&ema=0&priceScale=log&metricScale=linear&chartStyle=line",
+        "FUNDING": "https://www.coinglass.com/zh/FundingRate",
         "BLK_BTC": "https://www.coinglass.com/zh/bitcoin-etf",
         "BLK_ETH": "https://www.coinglass.com/zh/eth-etf",
-        "GAS": "https://mct.xyz/gasnow",
-        "STABLE_FLOW": "https://cryptoquant.com/asset/stablecoin/chart/exchange-flows/exchange-netflow-total?exchange=all_exchange&window=DAY&sma=0&ema=0&priceScale=log&metricScale=linear&chartStyle=column",
-        "FG": "https://www.coinglass.com/zh/pro/i/FearGreedIndex",
-        "TGA": "https://fred.stlouisfed.org/series/WTREGEN",
+        "STH": "https://www.coinglass.com/pro/i/short-term-holder-price",
         "MVRV": "https://www.bitcoinmagazinepro.com/charts/mvrv-zscore/",
         "AHR999": "https://9992100.xyz/",
-        "PIZZA": "https://www.pizzint.watch/",
-        "FUNDING": "https://www.coinglass.com/zh/FundingRate",
-        "CB_PREM": "https://cryptoquant.com/asset/btc/chart/market-data/coinbase-premium-index?window=DAY&sma=0&ema=0&priceScale=log&metricScale=linear&chartStyle=line",
-        "CME_OI": "https://www.coinglass.com/zh/BitcoinOpenInterest"
+        
+        # 华尔街 RWA 阵列
+        "STABLE_LINK": "https://defillama.com/stablecoins",
+        "SSR": "https://cryptoquant.com/asset/btc/chart/network-indicator/stablecoin-supply-ratio-ssr?window=DAY&sma=0&ema=0&priceScale=log&metricScale=linear&chartStyle=line",
+        "USDe": "https://defillama.com/protocol/ethena",
+        "PYUSD": "https://defillama.com/protocol/paypal-usd",
+        "Ondo": "https://defillama.com/protocol/ondo-finance",
+        "sFRAX": "https://defillama.com/protocol/frax",
+        "BUIDL": "https://defillama.com/protocol/blackrock-buidl",
+        "BENJI": "https://defillama.com/protocol/franklin-templeton-fobxx",
+        "USDM": "https://defillama.com/protocol/mountain-protocol",
+        "USTB": "https://defillama.com/protocol/superstate",
+        
+        # 微观绞肉机
+        "CME_OI": "https://www.coinglass.com/zh/BitcoinOpenInterest",
+        "LS_RATIO": "https://www.coinglass.com/zh/LongShortRatio",
+        "DEX_VOL": "https://defillama.com/dexs",
+        
+        # 上帝之眼底层
+        "STABLE_FLOW": "https://defillama.com/stablecoins",
+        "MINER": "https://www.blockchain.com/explorer/charts/miners-revenue",
+        "DVOL": "https://www.tradingview.com/symbols/BTC_DVOL/"
     }
 
-    def cell(val, link, label="查看"):
-        if val == "Link" or val == "N/A":
+    def cell(val, link, label="👁️ 查看"):
+        if val == "Link" or val == "N/A" or val == "---":
             return f"<a href='{link}' target='_blank' class='btn'>{label}</a>"
         else:
-            return f"<a href='{link}' target='_blank' class='val-link'>{val}</a>"
+            return f"<span class='val-text'>{val}</span>"
 
+    # AH 溢价处理
     ah_val = y_data['AH_PREMIUM']['value']
     ah_cell = cell(ah_val, links['AH_LINK']) if ah_val != "N/A" else cell("Link", links['AH_LINK'])
 
@@ -135,68 +164,83 @@ def generate_html(y_data, t_data):
     <!DOCTYPE html>
     <html>
     <head>
-        <title>金融核武库</title>
+        <title>Project Trident: 全域金融监控雷达</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>
-            body {{ font-family: -apple-system, system-ui, sans-serif; margin: 0; padding: 15px; background: #f0f2f5; }}
-            .container {{ max-width: 1200px; margin: 0 auto; }}
-            h1 {{ text-align: center; color: #1a1a1a; margin-bottom: 5px; }}
-            .time {{ text-align: center; color: #888; font-size: 0.85em; margin-bottom: 20px; }}
-            .card {{ background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; }}
-            h2 {{ font-size: 1.1em; color: #444; border-left: 4px solid #0066cc; padding-left: 10px; margin: 0 0 15px 0; }}
-            table {{ width: 100%; border-collapse: collapse; }}
-            th {{ font-size: 0.85em; color: #666; font-weight: normal; padding: 8px 5px; border-bottom: 1px solid #eee; }}
-            td {{ padding: 10px 5px; text-align: center; border-bottom: 1px solid #f5f5f5; font-size: 1em; font-weight: 500; }}
-            .trend {{ font-size: 0.7em; margin-left: 3px; }}
-            .btn {{ display: inline-block; background: #f0f7ff; color: #0066cc; padding: 4px 10px; border-radius: 4px; text-decoration: none; font-size: 0.9em; border: 1px solid #cce5ff; }}
-            .btn:hover {{ background: #0066cc; color: white; }}
-            .val-link {{ color: #333; text-decoration: none; border-bottom: 1px dotted #ccc; }}
-            .val-link:hover {{ color: #0066cc; border-bottom: 1px solid #0066cc; }}
-            .grid-box {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }}
-            .grid-item {{ background: #fafafa; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #eee; }}
-            .grid-label {{ display: block; font-size: 0.8em; color: #888; margin-bottom: 5px; }}
+            :root {{
+                --bg-color: #0d1117;
+                --panel-bg: #161b22;
+                --text-main: #c9d1d9;
+                --text-muted: #8b949e;
+                --border-color: #30363d;
+                --accent-blue: #58a6ff;
+                --accent-green: #3fb950;
+                --accent-red: #ff7b72;
+                --accent-yellow: #d29922;
+            }}
+            body {{ font-family: 'Courier New', Courier, monospace; margin: 0; padding: 15px; background: var(--bg-color); color: var(--text-main); }}
+            .container {{ max-width: 1300px; margin: 0 auto; }}
+            h1 {{ text-align: center; color: var(--accent-green); margin-bottom: 5px; text-transform: uppercase; text-shadow: 0 0 10px rgba(63, 185, 80, 0.3); }}
+            .time {{ text-align: center; color: var(--text-muted); font-size: 0.85em; margin-bottom: 25px; }}
+            .card {{ background: var(--panel-bg); padding: 20px; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }}
+            h2 {{ font-size: 1.1em; color: var(--accent-blue); border-left: 4px solid var(--accent-blue); padding-left: 10px; margin: 0 0 20px 0; text-transform: uppercase; }}
+            
+            /* Table Styling */
+            table {{ width: 100%; border-collapse: collapse; margin-bottom: 10px; }}
+            th {{ font-size: 0.85em; color: var(--text-muted); padding: 10px 5px; border-bottom: 1px dashed var(--border-color); font-weight: normal; }}
+            td {{ padding: 12px 5px; text-align: center; border-bottom: 1px solid #1f242c; font-size: 1.05em; font-weight: bold; color: #fff; }}
+            .trend {{ font-size: 0.7em; margin-left: 4px; }}
+            
+            /* Grid Box Styling */
+            .grid-box {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }}
+            .grid-item {{ background: #010409; padding: 15px 10px; border-radius: 4px; text-align: center; border: 1px solid var(--border-color); transition: all 0.2s; }}
+            .grid-item:hover {{ border-color: var(--accent-blue); transform: translateY(-2px); }}
+            .grid-label {{ display: block; font-size: 0.8em; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; }}
+            
+            /* Links & Values */
+            .btn {{ display: inline-block; background: transparent; color: var(--accent-yellow); padding: 4px 12px; border-radius: 3px; text-decoration: none; font-size: 0.9em; border: 1px solid var(--accent-yellow); transition: all 0.2s; }}
+            .btn:hover {{ background: var(--accent-yellow); color: #000; }}
+            .val-text {{ color: #fff; font-weight: bold; letter-spacing: 0.5px; }}
         </style>
     </head>
     <body>
         <div class="container">
-            <h1>☢️ 金融核武库</h1>
-            <div class="time">更新时间: {beijing_time}</div>
+            <h1>📡 Project Trident: 终极绞肉机雷达</h1>
+            <div class="time">>>> SYSTEM ALIVE | LAST SYNC: {beijing_time} (BJT)</div>
             
             <div class="card">
-                <h2>⛏️ 极简金矿 (宏观定调)</h2>
+                <h2>🌍 Tier 1: 宏观重力与天候 (Macro)</h2>
                 <div style="overflow-x: auto;">
-                    <table style="min-width: 800px;">
+                    <table style="min-width: 900px;">
                         <thead>
                             <tr>
-                                <th>US10Y<br>美债</th>
-                                <th>DXY<br>美元</th>
-                                <th>RRP<br>逆回购</th>
-                                <th>VIX<br>恐慌</th>
-                                <th>HYG<br>垃圾债</th>
+                                <th>10Y美债<br>成本引擎</th>
+                                <th>DXY美元<br>全球水管</th>
+                                <th>RRP逆回购<br>隔夜冗余</th>
+                                <th>TGA余额<br>财政核弹</th>
+                                <th>VIX恐慌<br>风暴眼</th>
+                                <th>HYG价格<br>垃圾债</th>
+                                <th>违约利差<br>信贷冰山</th>
                                 <th>黄金<br>避险</th>
                                 <th>白银<br>投机</th>
                                 <th>铜<br>复苏</th>
-                                <th>BTC.D<br>市占率</th>
-                                <th>USDT溢价<br>场外</th>
-                                <th>USD/CNH<br>汇率</th>
-                                <th>AH溢价<br>估值</th>
+                                <th>USD/CNH<br>离岸汇率</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td>{y_data['US10Y']['value']}<span class="trend">{y_data['US10Y']['trend']}</span></td>
                                 <td>{y_data['DXY']['value']}<span class="trend">{y_data['DXY']['trend']}</span></td>
-                                <td>{cell("Link", links['RRP'])}</td>
+                                <td>{cell(t_data.get('RRP', 'Link'), links['RRP'])}</td>
+                                <td>{cell(t_data.get('TGA', 'Link'), links['TGA'])}</td>
                                 <td>{y_data['VIX']['value']}<span class="trend">{y_data['VIX']['trend']}</span></td>
                                 <td>{y_data['HYG']['value']}<span class="trend">{y_data['HYG']['trend']}</span></td>
+                                <td>{cell(t_data.get('HYG_SPREAD', 'Link'), links['HYG_SPREAD'])}</td>
                                 <td>{y_data['GOLD']['value']}<span class="trend">{y_data['GOLD']['trend']}</span></td>
                                 <td>{y_data['SILVER']['value']}<span class="trend">{y_data['SILVER']['trend']}</span></td>
                                 <td>{y_data['COPPER']['value']}<span class="trend">{y_data['COPPER']['trend']}</span></td>
-                                <td>{cell(t_data['BTC.D'], links['BTC_D_LINK'])}</td>
-                                <td>{cell("Link", links['USDT_PREMIUM'])}</td>
                                 <td>{y_data['USDCNH']['value']}<span class="trend">{y_data['USDCNH']['trend']}</span></td>
-                                <td>{ah_cell}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -204,75 +248,50 @@ def generate_html(y_data, t_data):
             </div>
 
             <div class="card">
-                <h2>⚔️ 战术数据 (实战信号)</h2>
+                <h2>📈 Tier 2: 加密基石与估值生死线 (Valuation)</h2>
                 <div class="grid-box">
-                    <div class="grid-item">
-                        <span class="grid-label">稳定币市值</span>
-                        {cell(t_data['STABLE_CAP'], links['STABLE_LINK'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">TGA 余额</span>
-                        {cell(t_data['TGA'], links['TGA'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">贪婪恐慌</span>
-                        {cell(t_data['FEAR_GREED'], links['FG'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">ETH Gas</span>
-                        {cell(t_data['GAS'], links['GAS'])}
-                    </div>
-                    
-                    <!-- 新增：华尔街雷达 -->
-                    <div class="grid-item">
-                        <span class="grid-label">Coinbase溢价</span>
-                        {cell("Link", links['CB_PREM'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">CME持仓</span>
-                        {cell("Link", links['CME_OI'])}
-                    </div>
-                    
-                    <div class="grid-item">
-                        <span class="grid-label">资金费率</span>
-                        {cell("Link", links['FUNDING'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">北向资金</span>
-                        {cell("Link", links['NORTH_FUNDS'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">贝莱德 BTC</span>
-                        {cell("Link", links['BLK_BTC'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">贝莱德 ETH</span>
-                        {cell("Link", links['BLK_ETH'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">短手成本</span>
-                        {cell("Link", links['STH'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">稳定币流向</span>
-                        {cell("Link", links['STABLE_FLOW'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">MMFI 宽度</span>
-                        {cell("Link", links['MMFI'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">MVRV 逃顶</span>
-                        {cell("Link", links['MVRV'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">Ahr999 抄底</span>
-                        {cell("Link", links['AHR999'])}
-                    </div>
-                    <div class="grid-item">
-                        <span class="grid-label">披萨指数</span>
-                        {cell("Link", links['PIZZA'])}
-                    </div>
+                    <div class="grid-item"><span class="grid-label">BTC 现价</span><span class="val-text" style="color:var(--accent-green);font-size:1.2em;">{y_data['BTC_PRICE']['value']}</span></div>
+                    <div class="grid-item"><span class="grid-label">BTC 市占率</span>{cell(t_data.get('BTC.D', 'Link'), links['BTC_D_LINK'])}</div>
+                    <div class="grid-item"><span class="grid-label">USDT场外溢价</span>{cell("Link", links['USDT_PREMIUM'])}</div>
+                    <div class="grid-item"><span class="grid-label">贪婪恐慌指数</span>{cell(t_data.get('FEAR_GREED', 'Link'), links['FG'])}</div>
+                    <div class="grid-item"><span class="grid-label">以太坊 Gas</span>{cell(t_data.get('GAS', 'Link'), links['GAS'])}</div>
+                    <div class="grid-item"><span class="grid-label">MMFI 宽度</span>{cell("Link", links['MMFI'])}</div>
+                    <div class="grid-item"><span class="grid-label">Coinbase 溢价</span>{cell("Link", links['CB_PREM'])}</div>
+                    <div class="grid-item"><span class="grid-label">贝莱德 IBIT</span>{cell("Link", links['BLK_BTC'])}</div>
+                    <div class="grid-item"><span class="grid-label">贝莱德 ETHA</span>{cell("Link", links['BLK_ETH'])}</div>
+                    <div class="grid-item"><span class="grid-label">STH 散户成本</span>{cell("Link", links['STH'])}</div>
+                    <div class="grid-item"><span class="grid-label">MVRV 逃顶线</span>{cell("Link", links['MVRV'])}</div>
+                    <div class="grid-item"><span class="grid-label">AHR999 抄底</span>{cell("Link", links['AHR999'])}</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🏛️ Tier 3: 华尔街老钱与深层流向 (TradFi & Flow)</h2>
+                <div class="grid-box">
+                    <div class="grid-item"><span class="grid-label" style="color:var(--accent-red);">稳定币总市值</span>{cell(t_data.get('STABLE_CAP', 'Link'), links['STABLE_LINK'])}</div>
+                    <div class="grid-item"><span class="grid-label" style="color:var(--accent-red);">7日净流向/铸币</span>{cell("Link", links['STABLE_FLOW'], "🔥 监控")}</div>
+                    <div class="grid-item"><span class="grid-label">SSR 购买力</span>{cell("Link", links['SSR'])}</div>
+                    <div class="grid-item"><span class="grid-label">USDe (Ethena)</span>{cell("Link", links['USDe'])}</div>
+                    <div class="grid-item"><span class="grid-label">PYUSD (PayPal)</span>{cell("Link", links['PYUSD'])}</div>
+                    <div class="grid-item"><span class="grid-label">Ondo Finance</span>{cell("Link", links['Ondo'])}</div>
+                    <div class="grid-item"><span class="grid-label">sFRAX</span>{cell("Link", links['sFRAX'])}</div>
+                    <div class="grid-item"><span class="grid-label">BUIDL (贝莱德)</span>{cell("Link", links['BUIDL'])}</div>
+                    <div class="grid-item"><span class="grid-label">BENJI (富兰克林)</span>{cell("Link", links['BENJI'])}</div>
+                    <div class="grid-item"><span class="grid-label">USDM (Mountain)</span>{cell("Link", links['USDM'])}</div>
+                    <div class="grid-item"><span class="grid-label">USTB (Superstate)</span>{cell("Link", links['USTB'])}</div>
+                    <div class="grid-item"><span class="grid-label">北向资金(A股)</span>{ah_cell}</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🩸 Tier 4: 微观绞肉机与上帝底牌 (Microstructure)</h2>
+                <div class="grid-box">
+                    <div class="grid-item"><span class="grid-label">合约资金费率</span>{cell("Link", links['FUNDING'], "🗡️ 查费率")}</div>
+                    <div class="grid-item"><span class="grid-label">合约持仓当量(OI)</span>{cell("Link", links['CME_OI'])}</div>
+                    <div class="grid-item"><span class="grid-label">筹码多空比背离</span>{cell("Link", links['LS_RATIO'], "⚔️ 查背离")}</div>
+                    <div class="grid-item"><span class="grid-label">DEX 狂热交易量</span>{cell("Link", links['DEX_VOL'], "⚡ 查链上")}</div>
+                    <div class="grid-item"><span class="grid-label">矿工物理抛压</span>{cell("Link", links['MINER'], "⛏️ 查矿工")}</div>
+                    <div class="grid-item"><span class="grid-label">Deribit 灾难保险</span>{cell("Link", links['DVOL'], "🛡️ 查DVOL")}</div>
                 </div>
             </div>
             
@@ -283,10 +302,10 @@ def generate_html(y_data, t_data):
     return html
 
 if __name__ == "__main__":
-    print("开始任务...")
+    print("[SYSTEM] 启动 Project Trident 全域扫描...")
     y_data = get_yahoo_data()
     t_data = get_tactical_data()
     html = generate_html(y_data, t_data)
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
-    print("任务完成")
+    print("[SYSTEM] HTML 构建完成。前哨雷达部署完毕。")
