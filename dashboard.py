@@ -115,7 +115,7 @@ def generate_html(y_data, t_data):
         
         # --- 加密基础 ---
         "BTC_D_LINK": "https://www.tradingview.com/chart/?symbol=CRYPTOCAP%3ABTC.D",
-        "USDT_PREMIUM": "https://www.okx.com/zh-hans/p2p/markets/cny/buy-usdt",
+        "USDT_PREMIUM": "https://www.feixiaohao.com/data/stable.html",
         "FG": "https://www.coinglass.com/zh/pro/i/FearGreedIndex",
         "GAS": "https://etherscan.io/gastracker",
         "MMFI": "https://www.tradingview.com/chart/?symbol=BINANCE%3AMMFI",
