@@ -143,12 +143,12 @@ def generate_html(y_data, t_data):
         # --- 微观绞肉机 ---
         "CME_OI": "https://www.coinglass.com/zh/BitcoinOpenInterest",
         "LS_RATIO": "https://www.coinglass.com/zh/LongShortRatio",
-        "DEX_VOL": "https://defillama.com/dexs",
+        "DVOL": "https://www.deribit.com/statistics/BTC/volatility", # Deribit 官方波动率面板，绝不屏蔽
         
         # --- 上帝之眼底层 ---
         "STABLE_FLOW": "https://defillama.com/stablecoins", # DeFiLlama 最直观
         "MINER": "https://www.macromicro.me/collections/45/bitcoin-indicator/29676/bitcoin-miners-revenue", # 换用 MacroMicro，比官网更直观
-        "DVOL": "https://www.tradingview.com/chart/?symbol=DERIBIT%3ABTC_DVOL" # 强制打开图表模式
+        
     }
 
     def cell(val, link, label="👁️ 查看"):
