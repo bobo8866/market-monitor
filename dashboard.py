@@ -103,33 +103,34 @@ def generate_html(y_data, t_data):
     beijing_time = datetime.now(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M')
     
     # 🎯 全域 59列精准打击链接库
+    # 🎯 全域 59列精准打击链接库 (2026 极致免密校准版)
     links = {
-        # 基础宏观
+        # --- 基础宏观 ---
         "RRP": "https://fred.stlouisfed.org/series/RRPONTSYD",
         "TGA": "https://fred.stlouisfed.org/series/WTREGEN",
         "HYG_SPREAD": "https://fred.stlouisfed.org/series/BAMLH0A0HYM2",
         "AH_LINK": "https://quote.eastmoney.com/gb/zsHSAHP.html",
         "NORTH_FUNDS": "https://data.eastmoney.com/hsgt/index.html",
         
-        # 加密基础
-        "BTC_D_LINK": "https://www.tradingview.com/symbols/BTC.D/",
-        "USDT_PREMIUM": "https://www.feixiaohao.com/data/stable",
+        # --- 加密基础 ---
+        "BTC_D_LINK": "https://www.tradingview.com/chart/?symbol=CRYPTOCAP%3ABTC.D", # 强制打开图表模式
+        "USDT_PREMIUM": "https://www.okx.com/zh-hans/p2p/markets/cny/buy-usdt", # 直接看 OKX C2C 实时卖价
         "FG": "https://www.coinglass.com/zh/pro/i/FearGreedIndex",
-        "GAS": "https://mct.xyz/gasnow",
-        "MMFI": "https://www.tradingview.com/symbols/MMFI/",
+        "GAS": "https://etherscan.io/gastracker", # Etherscan 原生 Gas 追踪，最准
+        "MMFI": "https://www.tradingview.com/chart/?symbol=BINANCE%3AMMFI", # 强制打开币安多头图表
         
-        # 估值与 ETF
-        "CB_PREM": "https://cryptoquant.com/asset/btc/chart/market-data/coinbase-premium-index?window=DAY&sma=0&ema=0&priceScale=log&metricScale=linear&chartStyle=line",
+        # --- 估值与 ETF ---
+        "CB_PREM": "https://www.coinglass.com/zh/pro/i/CoinbasePremium", # 替换掉 CryptoQuant 的登录墙
         "FUNDING": "https://www.coinglass.com/zh/FundingRate",
         "BLK_BTC": "https://www.coinglass.com/zh/bitcoin-etf",
         "BLK_ETH": "https://www.coinglass.com/zh/eth-etf",
-        "STH": "https://www.coinglass.com/pro/i/short-term-holder-price",
-        "MVRV": "https://www.bitcoinmagazinepro.com/charts/mvrv-zscore/",
+        "STH": "https://www.coinglass.com/zh/pro/i/short-term-holder-price",
+        "MVRV": "https://www.coinglass.com/zh/pro/i/mvrv", # 替换成 Coinglass 免费版
         "AHR999": "https://9992100.xyz/",
         
-        # 华尔街 RWA 阵列
+        # --- 华尔街 RWA 阵列 ---
         "STABLE_LINK": "https://defillama.com/stablecoins",
-        "SSR": "https://cryptoquant.com/asset/btc/chart/network-indicator/stablecoin-supply-ratio-ssr?window=DAY&sma=0&ema=0&priceScale=log&metricScale=linear&chartStyle=line",
+        "SSR": "https://www.coinglass.com/zh/pro/i/SSR", # 替换掉 CryptoQuant 的登录墙
         "USDe": "https://defillama.com/protocol/ethena",
         "PYUSD": "https://defillama.com/protocol/paypal-usd",
         "Ondo": "https://defillama.com/protocol/ondo-finance",
@@ -139,15 +140,15 @@ def generate_html(y_data, t_data):
         "USDM": "https://defillama.com/protocol/mountain-protocol",
         "USTB": "https://defillama.com/protocol/superstate",
         
-        # 微观绞肉机
+        # --- 微观绞肉机 ---
         "CME_OI": "https://www.coinglass.com/zh/BitcoinOpenInterest",
         "LS_RATIO": "https://www.coinglass.com/zh/LongShortRatio",
         "DEX_VOL": "https://defillama.com/dexs",
         
-        # 上帝之眼底层
-        "STABLE_FLOW": "https://defillama.com/stablecoins",
-        "MINER": "https://www.blockchain.com/explorer/charts/miners-revenue",
-        "DVOL": "https://www.tradingview.com/symbols/BTC_DVOL/"
+        # --- 上帝之眼底层 ---
+        "STABLE_FLOW": "https://defillama.com/stablecoins", # DeFiLlama 最直观
+        "MINER": "https://www.macromicro.me/collections/45/bitcoin-indicator/29676/bitcoin-miners-revenue", # 换用 MacroMicro，比官网更直观
+        "DVOL": "https://www.tradingview.com/chart/?symbol=DERIBIT%3ABTC_DVOL" # 强制打开图表模式
     }
 
     def cell(val, link, label="👁️ 查看"):
