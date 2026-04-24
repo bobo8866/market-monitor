@@ -135,7 +135,7 @@ def generate_html(y_data, t_data):
         "SSR": "https://www.coinglass.com/zh/pro/i/SSR",
         "USDe": "https://defillama.com/protocol/ethena",
         "PYUSD": "https://defillama.com/protocol/paypal-usd",
-        "Ondo": "https://defillama.com/protocol/ondo-finance",
+        "Ondo": "https://defillama.com/protocol/stablecoins/ondo-finance",
         "sFRAX": "https://defillama.com/stablecoin/frax",
         "BUIDL": "https://defillama.com/rwa/asset/BUIDL",
         "BENJI": "https://defillama.com/rwa/asset/BENJI", 
