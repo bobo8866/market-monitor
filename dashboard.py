@@ -149,7 +149,7 @@ def generate_html(y_data, t_data):
         
         # --- 上帝之眼底层 ---
         "STABLE_FLOW": "https://defillama.com/stablecoins",
-        "MINER": "https://www.blockchain.com/explorer/charts/miners-revenue",
+        "MINER": "https://www.theblock.co/data/on-chain-metrics/bitcoin/bitcoin-miner-revenue-daily",
         "DVOL": "https://www.deribit.com/statistics/BTC/volatility" 
     }
     
