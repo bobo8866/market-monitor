@@ -104,6 +104,7 @@ def generate_html(y_data, t_data):
     
     # 🎯 全域 59列精准打击链接库
     # 🎯 全域 59列精准打击链接库 (2026 极致免密校准版)
+    # 🎯 全域 59列精准打击链接库 (最终完整核对版 - 官方直连版)
     links = {
         # --- 基础宏观 ---
         "RRP": "https://fred.stlouisfed.org/series/RRPONTSYD",
@@ -113,24 +114,25 @@ def generate_html(y_data, t_data):
         "NORTH_FUNDS": "https://data.eastmoney.com/hsgt/index.html",
         
         # --- 加密基础 ---
-        "BTC_D_LINK": "https://www.tradingview.com/chart/?symbol=CRYPTOCAP%3ABTC.D", # 强制打开图表模式
-        "USDT_PREMIUM": "https://www.okx.com/zh-hans/p2p/markets/cny/buy-usdt", # 直接看 OKX C2C 实时卖价
+        "BTC_D_LINK": "https://www.tradingview.com/chart/?symbol=CRYPTOCAP%3ABTC.D",
+        "USDT_PREMIUM": "https://www.okx.com/zh-hans/p2p/markets/cny/buy-usdt",
         "FG": "https://www.coinglass.com/zh/pro/i/FearGreedIndex",
-        "GAS": "https://etherscan.io/gastracker", # Etherscan 原生 Gas 追踪，最准
-        "MMFI": "https://www.tradingview.com/chart/?symbol=BINANCE%3AMMFI", # 强制打开币安多头图表
+        "GAS": "https://etherscan.io/gastracker",
+        "MMFI": "https://www.tradingview.com/chart/?symbol=BINANCE%3AMMFI",
         
         # --- 估值与 ETF ---
-        "CB_PREM": "https://www.coinglass.com/zh/pro/i/CoinbasePremium", # 替换掉 CryptoQuant 的登录墙
+        "CB_PREM": "https://www.coinglass.com/zh/pro/i/CoinbasePremium",
         "FUNDING": "https://www.coinglass.com/zh/FundingRate",
         "BLK_BTC": "https://www.coinglass.com/zh/bitcoin-etf",
         "BLK_ETH": "https://www.coinglass.com/zh/eth-etf",
         "STH": "https://www.coinglass.com/zh/pro/i/short-term-holder-price",
-        "MVRV": "https://www.coinglass.com/zh/pro/i/mvrv", # 替换成 Coinglass 免费版
+        "MVRV": "https://www.coinglass.com/zh/pro/i/mvrv",
         "AHR999": "https://9992100.xyz/",
+        "PIZZA": "https://www.pizzint.watch/", 
         
         # --- 华尔街 RWA 阵列 ---
         "STABLE_LINK": "https://defillama.com/stablecoins",
-        "SSR": "https://www.coinglass.com/zh/pro/i/SSR", # 替换掉 CryptoQuant 的登录墙
+        "SSR": "https://www.coinglass.com/zh/pro/i/SSR",
         "USDe": "https://defillama.com/protocol/ethena",
         "PYUSD": "https://defillama.com/protocol/paypal-usd",
         "Ondo": "https://defillama.com/protocol/ondo-finance",
@@ -143,14 +145,14 @@ def generate_html(y_data, t_data):
         # --- 微观绞肉机 ---
         "CME_OI": "https://www.coinglass.com/zh/BitcoinOpenInterest",
         "LS_RATIO": "https://www.coinglass.com/zh/LongShortRatio",
-        "DVOL": "https://www.deribit.com/statistics/BTC/volatility", # Deribit 官方波动率面板，绝不屏蔽
+        "DEX_VOL": "https://defillama.com/dexs",
         
         # --- 上帝之眼底层 ---
-        "STABLE_FLOW": "https://defillama.com/stablecoins", # DeFiLlama 最直观
-        "MINER": "https://www.macromicro.me/collections/45/bitcoin-indicator/29676/bitcoin-miners-revenue", # 换用 MacroMicro，比官网更直观
-        
+        "STABLE_FLOW": "https://defillama.com/stablecoins",
+        "MINER": "https://www.macromicro.me/collections/45/bitcoin-indicator/29676/bitcoin-miners-revenue",
+        "DVOL": "https://www.deribit.com/statistics/BTC/volatility" 
     }
-
+    
     def cell(val, link, label="👁️ 查看"):
         if val == "Link" or val == "N/A" or val == "---":
             return f"<a href='{link}' target='_blank' class='btn'>{label}</a>"
