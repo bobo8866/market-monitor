@@ -137,8 +137,8 @@ def generate_html(y_data, t_data):
         "PYUSD": "https://defillama.com/protocol/paypal-usd",
         "Ondo": "https://defillama.com/protocol/ondo-finance",
         "sFRAX": "https://defillama.com/protocol/frax",
-        "BUIDL": "https://defillama.com/protocol/blackrock-buidl",
-        "BENJI": "https://defillama.com/protocol/franklin-templeton-fobxx",
+        "BUIDL": "https://defillama.com/rwa/asset/BUIDL",
+        "BENJI": "https://defillama.com/rwa/asset/BENJI", 
         "USDM": "https://defillama.com/protocol/mountain-protocol",
         "USTB": "https://defillama.com/protocol/superstate",
         
