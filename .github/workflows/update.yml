@@ -2,36 +2,34 @@ name: Update Market Dashboard
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # 每天UTC时间0点运行 (北京时间早上8点)
-  workflow_dispatch:      # 允许你手动点击按钮运行
-
-permissions:
-  contents: write
+    # 每天 UTC 时间 0点和12点自动执行 (北京时间早上8点和晚上8点)
+    - cron: '0 0,12 * * *'
+  workflow_dispatch: # 允许你随时点击按钮手动执行
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v4 # ✅ 修复警告：已升级到最新的 v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5 # ✅ 修复警告：已升级到最新的 v5
       with:
-        python-version: '3.9'
+        python-version: '3.10'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install yfinance pandas pytz 
+        pip install requests pandas yfinance pytz # ✅ 修复报错：安装四大重型武器库
 
-    - name: Run script
+    - name: Run dashboard script
       run: python dashboard.py
 
-    - name: Commit and Push
+    - name: Commit and push changes
       run: |
-        git config --global user.name 'github-actions[bot]'
-        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
         git add index.html
-        git commit -m "Auto-update market data" || exit 0
+        git commit -m "Auto-update market dashboard" || exit 0
         git push
