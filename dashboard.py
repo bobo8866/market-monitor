@@ -118,7 +118,7 @@ def generate_html(y_data, t_data):
         "USDT_PREMIUM": "https://www.feixiaohao.com/data/stable.html",
         "FG": "https://www.coinglass.com/zh/pro/i/FearGreedIndex",
         "GAS": "https://etherscan.io/gastracker",
-        "MMFI": "https://www.tradingview.com/chart/?symbol=BINANCE%3AMMFI",
+        "MMFI": "https://www.tradingview.com/symbols/MMFI/",
         
         # --- 估值与 ETF ---
         "CB_PREM": "https://www.coinglass.com/zh/pro/i/CoinbasePremium",
