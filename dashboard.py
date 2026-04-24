@@ -136,7 +136,7 @@ def generate_html(y_data, t_data):
         "USDe": "https://defillama.com/protocol/ethena",
         "PYUSD": "https://defillama.com/protocol/paypal-usd",
         "Ondo": "https://defillama.com/protocol/ondo-finance",
-        "sFRAX": "https://defillama.com/protocol/frax",
+        "sFRAX": "https://defillama.com/stablecoin/frax",
         "BUIDL": "https://defillama.com/rwa/asset/BUIDL",
         "BENJI": "https://defillama.com/rwa/asset/BENJI", 
         "USDM": "https://defillama.com/protocol/mountain-protocol",
