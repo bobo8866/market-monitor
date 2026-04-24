@@ -121,7 +121,7 @@ def generate_html(y_data, t_data):
         "MMFI": "https://www.tradingview.com/symbols/MMFI/",
         
         # --- 估值与 ETF ---
-        "CB_PREM": "https://www.coinglass.com/zh/pro/i/CoinbasePremium",
+        "CB_PREM": "https://www.coinglass.com/zh/pro/i/coinbase-bitcoin-premium-index",
         "FUNDING": "https://www.coinglass.com/zh/FundingRate",
         "BLK_BTC": "https://www.coinglass.com/zh/bitcoin-etf",
         "BLK_ETH": "https://www.coinglass.com/zh/eth-etf",
