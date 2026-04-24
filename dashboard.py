@@ -134,7 +134,7 @@ def generate_html(y_data, t_data):
         "STABLE_LINK": "https://defillama.com/stablecoins",
         "SSR": "https://www.coinglass.com/zh/pro/i/SSR",
         "USDe": "https://defillama.com/protocol/ethena",
-        "PYUSD": "https://defillama.com/protocol/paypal-usd",
+        "PYUSD": "https://defillama.com/stablecoin/paypal-usd", 
         "Ondo": "https://defillama.com/protocol/stablecoins/ondo-finance",
         "sFRAX": "https://defillama.com/stablecoin/frax",
         "BUIDL": "https://defillama.com/rwa/asset/BUIDL",
