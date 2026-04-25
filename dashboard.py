@@ -5,7 +5,7 @@ from datetime import datetime
 import pytz
 
 # ==========================================
-# 顶级宏观与微观流动性监控引擎 (GitHub Actions 战术大屏版 - 全火力满载+顶格防抽风版)
+# 顶级宏观与微观流动性监控引擎 (GitHub Actions 战术大屏版 - 北向资金归位版)
 # ==========================================
 
 def get_yahoo_data():
@@ -103,6 +103,7 @@ def generate_html(y_data, t_data):
         "TGA": "https://fred.stlouisfed.org/series/WTREGEN",
         "HYG_SPREAD": "https://fred.stlouisfed.org/series/BAMLH0A0HYM2",
         "AH_LINK": "https://quote.eastmoney.com/gb/zsHSAHP.html",
+        "NORTH_FUNDS": "https://data.eastmoney.com/hsgt/index.html", # 🩸 北向资金在此彻底归位！
         "CN10Y_YIELD": "https://cn.tradingview.com/symbols/TVC-CN10Y/",  
         
         # --- 加密基础 ---
@@ -163,6 +164,8 @@ def generate_html(y_data, t_data):
             return f"<a href='{link}' target='_blank' class='btn'>{label}</a>"
         else:
             return f"<span class='val-text'>{val}</span>"
+
+    ah_cell = cell("Link", links['AH_LINK'])
 
 # ！！！警告：下面的 HTML 代码故意没有缩进，全靠最左边！
 # ！！！这是为了防止 Github Pages 把网页当成 Markdown 代码块渲染！千万别在这个区块里加空格！
@@ -267,7 +270,7 @@ td {{ padding: 12px 5px; text-align: center; border-bottom: 1px solid #1f242c; f
 </div>
 
 <div class="card">
-<h2>🏛️ Tier 3: 华尔街老钱与深层流向 (TradFi & Flow)</h2>
+<h2>🏛️ Tier 3: 东西方流动性总泵 (Global Flow)</h2>
 <div class="grid-box">
 <div class="grid-item"><span class="grid-label" style="color:var(--accent-red);">稳定币总市值</span>{cell(t_data.get('STABLE_CAP', 'Link'), links['STABLE_LINK'])}</div>
 <div class="grid-item"><span class="grid-label" style="color:var(--accent-red);">USDT 净流入</span>{cell("Link", links['USDT_FLOW'], "🔥 监控")}</div>
@@ -279,7 +282,8 @@ td {{ padding: 12px 5px; text-align: center; border-bottom: 1px solid #1f242c; f
 <div class="grid-item"><span class="grid-label">FDUSD 东方钱袋</span>{cell("Link", links['FDUSD_MCAP'], "🇨🇳 离岸水管")}</div>
 <div class="grid-item"><span class="grid-label">泡菜溢价 (韩国)</span>{cell("Link", links['KIMCHI_PREM'], "🇰🇷 亚洲狂热")}</div>
 <div class="grid-item"><span class="grid-label">中国 10Y 国债</span>{cell("Link", links['CN10Y_YIELD'], "🇨🇳 放水总阀")}</div>
-<div class="grid-item"><span class="grid-label">AH股溢价 / 北向</span>{cell("Link", links['AH_LINK'], "👁️ 查看")}</div>
+<div class="grid-item"><span class="grid-label">北向资金(A股)</span>{cell("Link", links['NORTH_FUNDS'], "👁️ 查看")}</div>
+<div class="grid-item"><span class="grid-label">AH股溢价</span>{ah_cell}</div>
 <div class="grid-item"><span class="grid-label">USDe 规模</span>{cell("Link", links['USDe'])}</div>
 <div class="grid-item"><span class="grid-label">sUSDe 收益率</span>{cell("Link", links['sUSDe_YIELD'])}</div>
 <div class="grid-item"><span class="grid-label">PYUSD 规模</span>{cell("Link", links['PYUSD'])}</div>
