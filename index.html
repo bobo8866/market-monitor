@@ -1,113 +1,23 @@
-import yfinance as yf
-import pandas as pd
-import requests
-from datetime import datetime
-import pytz
-
-# ==========================================
-# 顶级宏观与微观流动性监控引擎 (GitHub Actions 战术大屏版)
-# ==========================================
-
-def get_yahoo_data():
-    tickers = {
-        "BTC_PRICE": "BTC-USD",
-        "US10Y": "^TNX",      
-        "DXY": "DX-Y.NYB",    
-        "VIX": "^VIX",        
-        "HYG": "HYG",         
-        "USDCNH": "CNH=X",
-        "GOLD": "GC=F",       
-        "SILVER": "SI=F",     
-        "COPPER": "HG=F"      
-        # 注：雅虎财经的 AH 股数据已失效，从这里彻底踢出，防止报错污染日志。
-    }
-    
-    data = {}
-    for name, ticker in tickers.items():
-        try:
-            stock = yf.Ticker(ticker)
-            price = stock.fast_info['last_price']
-            prev_close = stock.fast_info.get('previous_close', price)
-            
-            if name == "US10Y":
-                fmt_price = f"{price:.2f}%"
-            elif name == "BTC_PRICE":
-                fmt_price = f"${price:,.2f}"
-            else:
-                fmt_price = f"{price:.2f}"
-                
-            data[name] = {
-                "value": fmt_price,
-                "trend": "🔴" if price > prev_close else "🟢" if price < prev_close else "⚪"
-            }
-        except:
-            data[name] = {"value": "N/A", "trend": "⚪"}
-    return data
-
-def get_tactical_data():
-    data = {}
-    
-    # 1. 免密白嫖美联储 FRED 数据
-    fred_series = {
-        "TGA": "WTREGEN",
-        "RRP": "RRPONTSYD",
-        "HYG_SPREAD": "BAMLH0A0HYM2"
-    }
-    for name, series_id in fred_series.items():
-        try:
-            csv_url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series_id}"
-            df = pd.read_csv(csv_url)
-            last_val = float(df.iloc[-1, 1])
-            if name in ["TGA", "RRP"]:
-                data[name] = f"${last_val:.0f}B"
-            else:
-                data[name] = f"{last_val:.2f}%"
-        except: data[name] = "Link"
-
-    # 2. BTC.D
-    try:
-        url = "https://api.coingecko.com/api/v3/global"
-        r = requests.get(url, timeout=10)
-        if r.status_code == 200:
-            val = r.json()['data']['market_cap_percentage']['btc']
-            data['BTC.D'] = f"{val:.1f}%"
-        else: data['BTC.D'] = "Link"
-    except: data['BTC.D'] = "Link"
-
-    # 3. 贪婪恐慌
-    try:
-        r = requests.get("https://api.alternative.me/fng/", timeout=10)
-        if r.status_code == 200:
-            item = r.json()['data'][0]
-            data['FEAR_GREED'] = f"{item['value']} ({item['value_classification']})"
-        else: data['FEAR_GREED'] = "Link"
-    except: data['FEAR_GREED'] = "Link"
-
-    # 4. ETH Gas
-    try:
-        r = requests.get("https://beaconcha.in/api/v1/execution/gasnow", timeout=10)
-        if r.status_code == 200:
-            rapid = r.json()['data']['rapid']
-            gas_val = int(rapid / 1000000000)
-            data['GAS'] = f"{gas_val} Gwei"
-        else: data['GAS'] = "Link"
-    except: data['GAS'] = "Link"
-
-    return data
-
+# === 3. 生成高密度战术前端 HTML ===
 def generate_html(y_data, t_data):
     beijing_time = datetime.now(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M')
     
+    # 🎯 全域 59列精准打击链接库
     links = {
+        # --- 基础宏观 ---
         "RRP": "https://fred.stlouisfed.org/series/RRPONTSYD",
         "TGA": "https://fred.stlouisfed.org/series/WTREGEN",
         "HYG_SPREAD": "https://fred.stlouisfed.org/series/BAMLH0A0HYM2",
         "AH_LINK": "https://quote.eastmoney.com/gb/zsHSAHP.html",
+        
+        # --- 加密基础 ---
         "BTC_D_LINK": "https://www.tradingview.com/chart/?symbol=CRYPTOCAP%3ABTC.D",
         "USDT_PREMIUM": "https://www.feixiaohao.com/data/stable.html",
         "FG": "https://www.coinglass.com/zh/pro/i/FearGreedIndex",
         "GAS": "https://etherscan.io/gastracker",
         "MMFI": "https://www.tradingview.com/symbols/MMFI/",
+        
+        # --- 估值与 ETF ---
         "CB_PREM": "https://www.coinglass.com/zh/pro/i/coinbase-bitcoin-premium-index",
         "FUNDING": "https://www.coinglass.com/zh/FundingRate",
         "BLK_BTC": "https://www.coinglass.com/zh/bitcoin-etf",
@@ -115,6 +25,8 @@ def generate_html(y_data, t_data):
         "STH": "https://www.coinglass.com/zh/pro/i/short-term-holder-price",
         "MVRV": "https://www.bitcoinmagazinepro.com/charts/mvrv-zscore/",
         "AHR999": "https://9992100.xyz/",
+        
+        # --- 华尔街 RWA 阵列 ---
         "STABLE_LINK": "https://defillama.com/stablecoins",
         "STABLE_FLOW": "https://defillama.com/stablecoins",
         "SSR": "https://www.tradingview.com/chart/?symbol=CRYPTOCAP%3ABTC%2FCRYPTOCAP%3ASTABLE.C",
@@ -125,6 +37,8 @@ def generate_html(y_data, t_data):
         "BENJI": "https://defillama.com/rwa/asset/BENJI", 
         "USDM": "https://defillama.com/protocol/mountain-protocol",
         "USTB": "https://defillama.com/protocol/superstate",
+        
+        # --- 微观绞肉机 ---
         "CME_OI": "https://www.coinglass.com/zh/BitcoinOpenInterest",
         "LS_RATIO": "https://www.coinglass.com/zh/LongShortRatio",
         "DEX_VOL": "https://defillama.com/dexs",
@@ -138,8 +52,9 @@ def generate_html(y_data, t_data):
         else:
             return f"<span class='val-text'>{val}</span>"
 
-    # 前端保留 AH 溢价查看入口，但不依赖雅虎抓取数据，避免崩溃
-    ah_cell = cell("Link", links['AH_LINK'])
+    # AH 溢价处理 (容错保护：如果 yfinance 抓不到，自动回退成链接按钮)
+    ah_val = y_data.get('AH_PREMIUM', {}).get('value', 'N/A')
+    ah_cell = cell(ah_val, links['AH_LINK']) if ah_val != "N/A" else cell("Link", links['AH_LINK'])
 
     html = f"""
     <!DOCTYPE html>
@@ -280,12 +195,3 @@ def generate_html(y_data, t_data):
     </html>
     """
     return html
-
-if __name__ == "__main__":
-    print("[SYSTEM] 启动 Project Trident 全域扫描...")
-    y_data = get_yahoo_data()
-    t_data = get_tactical_data()
-    html = generate_html(y_data, t_data)
-    with open("index.html", "w", encoding="utf-8") as f:
-        f.write(html)
-    print("[SYSTEM] HTML 构建完成。前哨雷达部署完毕。")
