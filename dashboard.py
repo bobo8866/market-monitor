@@ -167,19 +167,16 @@ def generate_html(y_data, t_data):
             .card {{ background: var(--panel-bg); padding: 20px; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }}
             h2 {{ font-size: 1.1em; color: var(--accent-blue); border-left: 4px solid var(--accent-blue); padding-left: 10px; margin: 0 0 20px 0; text-transform: uppercase; }}
             
-            /* Table Styling */
             table {{ width: 100%; border-collapse: collapse; margin-bottom: 10px; }}
             th {{ font-size: 0.85em; color: var(--text-muted); padding: 10px 5px; border-bottom: 1px dashed var(--border-color); font-weight: normal; }}
             td {{ padding: 12px 5px; text-align: center; border-bottom: 1px solid #1f242c; font-size: 1.05em; font-weight: bold; color: #fff; }}
             .trend {{ font-size: 0.7em; margin-left: 4px; }}
             
-            /* Grid Box Styling */
             .grid-box {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }}
             .grid-item {{ background: #010409; padding: 15px 10px; border-radius: 4px; text-align: center; border: 1px solid var(--border-color); transition: all 0.2s; }}
             .grid-item:hover {{ border-color: var(--accent-blue); transform: translateY(-2px); }}
             .grid-label {{ display: block; font-size: 0.8em; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; }}
             
-            /* Links & Values */
             .btn {{ display: inline-block; background: transparent; color: var(--accent-yellow); padding: 4px 12px; border-radius: 3px; text-decoration: none; font-size: 0.9em; border: 1px solid var(--accent-yellow); transition: all 0.2s; }}
             .btn:hover {{ background: var(--accent-yellow); color: #000; }}
             .val-text {{ color: #fff; font-weight: bold; letter-spacing: 0.5px; }}
@@ -211,17 +208,17 @@ def generate_html(y_data, t_data):
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{y_data.get('US10Y', {{}}).get('value', 'N/A')}<span class="trend">{y_data.get('US10Y', {{}}).get('trend', '⚪')}</span></td>
-                                <td>{y_data.get('DXY', {{}}).get('value', 'N/A')}<span class="trend">{y_data.get('DXY', {{}}).get('trend', '⚪')}</span></td>
+                                <td>{y_data.get('US10Y', dict()).get('value', 'N/A')}<span class="trend">{y_data.get('US10Y', dict()).get('trend', '⚪')}</span></td>
+                                <td>{y_data.get('DXY', dict()).get('value', 'N/A')}<span class="trend">{y_data.get('DXY', dict()).get('trend', '⚪')}</span></td>
                                 <td>{cell(t_data.get('RRP', 'Link'), links['RRP'])}</td>
                                 <td>{cell(t_data.get('TGA', 'Link'), links['TGA'])}</td>
-                                <td>{y_data.get('VIX', {{}}).get('value', 'N/A')}<span class="trend">{y_data.get('VIX', {{}}).get('trend', '⚪')}</span></td>
-                                <td>{y_data.get('HYG', {{}}).get('value', 'N/A')}<span class="trend">{y_data.get('HYG', {{}}).get('trend', '⚪')}</span></td>
+                                <td>{y_data.get('VIX', dict()).get('value', 'N/A')}<span class="trend">{y_data.get('VIX', dict()).get('trend', '⚪')}</span></td>
+                                <td>{y_data.get('HYG', dict()).get('value', 'N/A')}<span class="trend">{y_data.get('HYG', dict()).get('trend', '⚪')}</span></td>
                                 <td>{cell(t_data.get('HYG_SPREAD', 'Link'), links['HYG_SPREAD'])}</td>
-                                <td>{y_data.get('GOLD', {{}}).get('value', 'N/A')}<span class="trend">{y_data.get('GOLD', {{}}).get('trend', '⚪')}</span></td>
-                                <td>{y_data.get('SILVER', {{}}).get('value', 'N/A')}<span class="trend">{y_data.get('SILVER', {{}}).get('trend', '⚪')}</span></td>
-                                <td>{y_data.get('COPPER', {{}}).get('value', 'N/A')}<span class="trend">{y_data.get('COPPER', {{}}).get('trend', '⚪')}</span></td>
-                                <td>{y_data.get('USDCNH', {{}}).get('value', 'N/A')}<span class="trend">{y_data.get('USDCNH', {{}}).get('trend', '⚪')}</span></td>
+                                <td>{y_data.get('GOLD', dict()).get('value', 'N/A')}<span class="trend">{y_data.get('GOLD', dict()).get('trend', '⚪')}</span></td>
+                                <td>{y_data.get('SILVER', dict()).get('value', 'N/A')}<span class="trend">{y_data.get('SILVER', dict()).get('trend', '⚪')}</span></td>
+                                <td>{y_data.get('COPPER', dict()).get('value', 'N/A')}<span class="trend">{y_data.get('COPPER', dict()).get('trend', '⚪')}</span></td>
+                                <td>{y_data.get('USDCNH', dict()).get('value', 'N/A')}<span class="trend">{y_data.get('USDCNH', dict()).get('trend', '⚪')}</span></td>
                             </tr>
                         </tbody>
                     </table>
@@ -231,7 +228,7 @@ def generate_html(y_data, t_data):
             <div class="card">
                 <h2>📈 Tier 2: 加密基石与估值生死线 (Valuation)</h2>
                 <div class="grid-box">
-                    <div class="grid-item"><span class="grid-label">BTC 现价</span><span class="val-text" style="color:var(--accent-green);font-size:1.2em;">{y_data.get('BTC_PRICE', {{}}).get('value', 'N/A')}</span></div>
+                    <div class="grid-item"><span class="grid-label">BTC 现价</span><span class="val-text" style="color:var(--accent-green);font-size:1.2em;">{y_data.get('BTC_PRICE', dict()).get('value', 'N/A')}</span></div>
                     <div class="grid-item"><span class="grid-label">BTC 市占率</span>{cell(t_data.get('BTC.D', 'Link'), links['BTC_D_LINK'])}</div>
                     <div class="grid-item"><span class="grid-label">USDT场外溢价</span>{cell("Link", links['USDT_PREMIUM'])}</div>
                     <div class="grid-item"><span class="grid-label">贪婪恐慌指数</span>{cell(t_data.get('FEAR_GREED', 'Link'), links['FG'])}</div>
