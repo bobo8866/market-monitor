@@ -1,62 +1,4 @@
-# === 3. 生成高密度战术前端 HTML ===
-def generate_html(y_data, t_data):
-    beijing_time = datetime.now(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M')
-    
-    # 🎯 全域 59列精准打击链接库
-    links = {
-        # --- 基础宏观 ---
-        "RRP": "https://fred.stlouisfed.org/series/RRPONTSYD",
-        "TGA": "https://fred.stlouisfed.org/series/WTREGEN",
-        "HYG_SPREAD": "https://fred.stlouisfed.org/series/BAMLH0A0HYM2",
-        "AH_LINK": "https://quote.eastmoney.com/gb/zsHSAHP.html",
-        
-        # --- 加密基础 ---
-        "BTC_D_LINK": "https://www.tradingview.com/chart/?symbol=CRYPTOCAP%3ABTC.D",
-        "USDT_PREMIUM": "https://www.feixiaohao.com/data/stable.html",
-        "FG": "https://www.coinglass.com/zh/pro/i/FearGreedIndex",
-        "GAS": "https://etherscan.io/gastracker",
-        "MMFI": "https://www.tradingview.com/symbols/MMFI/",
-        
-        # --- 估值与 ETF ---
-        "CB_PREM": "https://www.coinglass.com/zh/pro/i/coinbase-bitcoin-premium-index",
-        "FUNDING": "https://www.coinglass.com/zh/FundingRate",
-        "BLK_BTC": "https://www.coinglass.com/zh/bitcoin-etf",
-        "BLK_ETH": "https://www.coinglass.com/zh/eth-etf",
-        "STH": "https://www.coinglass.com/zh/pro/i/short-term-holder-price",
-        "MVRV": "https://www.bitcoinmagazinepro.com/charts/mvrv-zscore/",
-        "AHR999": "https://9992100.xyz/",
-        
-        # --- 华尔街 RWA 阵列 ---
-        "STABLE_LINK": "https://defillama.com/stablecoins",
-        "STABLE_FLOW": "https://defillama.com/stablecoins",
-        "SSR": "https://www.tradingview.com/chart/?symbol=CRYPTOCAP%3ABTC%2FCRYPTOCAP%3ASTABLE.C",
-        "USDe": "https://defillama.com/protocol/stablecoins/ethena",
-        "PYUSD": "https://defillama.com/stablecoin/paypal-usd",
-        "Ondo": "https://defillama.com/protocol/stablecoins/ondo-finance",
-        "BUIDL": "https://defillama.com/rwa/asset/BUIDL",
-        "BENJI": "https://defillama.com/rwa/asset/BENJI", 
-        "USDM": "https://defillama.com/protocol/mountain-protocol",
-        "USTB": "https://defillama.com/protocol/superstate",
-        
-        # --- 微观绞肉机 ---
-        "CME_OI": "https://www.coinglass.com/zh/BitcoinOpenInterest",
-        "LS_RATIO": "https://www.coinglass.com/zh/LongShortRatio",
-        "DEX_VOL": "https://defillama.com/dexs",
-        "MINER": "https://www.theblock.co/data/on-chain-metrics/bitcoin/bitcoin-miner-revenue-daily",
-        "DVOL": "https://www.deribit.com/statistics/BTC/volatility" 
-    }
-    
-    def cell(val, link, label="👁️ 查看"):
-        if val == "Link" or val == "N/A" or val == "---":
-            return f"<a href='{link}' target='_blank' class='btn'>{label}</a>"
-        else:
-            return f"<span class='val-text'>{val}</span>"
 
-    # AH 溢价处理 (容错保护：如果 yfinance 抓不到，自动回退成链接按钮)
-    ah_val = y_data.get('AH_PREMIUM', {}).get('value', 'N/A')
-    ah_cell = cell(ah_val, links['AH_LINK']) if ah_val != "N/A" else cell("Link", links['AH_LINK'])
-
-    html = f"""
     <!DOCTYPE html>
     <html>
     <head>
@@ -64,7 +6,7 @@ def generate_html(y_data, t_data):
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>
-            :root {{
+            :root {
                 --bg-color: #0d1117;
                 --panel-bg: #161b22;
                 --text-main: #c9d1d9;
@@ -74,36 +16,33 @@ def generate_html(y_data, t_data):
                 --accent-green: #3fb950;
                 --accent-red: #ff7b72;
                 --accent-yellow: #d29922;
-            }}
-            body {{ font-family: 'Courier New', Courier, monospace; margin: 0; padding: 15px; background: var(--bg-color); color: var(--text-main); }}
-            .container {{ max-width: 1300px; margin: 0 auto; }}
-            h1 {{ text-align: center; color: var(--accent-green); margin-bottom: 5px; text-transform: uppercase; text-shadow: 0 0 10px rgba(63, 185, 80, 0.3); }}
-            .time {{ text-align: center; color: var(--text-muted); font-size: 0.85em; margin-bottom: 25px; }}
-            .card {{ background: var(--panel-bg); padding: 20px; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }}
-            h2 {{ font-size: 1.1em; color: var(--accent-blue); border-left: 4px solid var(--accent-blue); padding-left: 10px; margin: 0 0 20px 0; text-transform: uppercase; }}
+            }
+            body { font-family: 'Courier New', Courier, monospace; margin: 0; padding: 15px; background: var(--bg-color); color: var(--text-main); }
+            .container { max-width: 1300px; margin: 0 auto; }
+            h1 { text-align: center; color: var(--accent-green); margin-bottom: 5px; text-transform: uppercase; text-shadow: 0 0 10px rgba(63, 185, 80, 0.3); }
+            .time { text-align: center; color: var(--text-muted); font-size: 0.85em; margin-bottom: 25px; }
+            .card { background: var(--panel-bg); padding: 20px; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+            h2 { font-size: 1.1em; color: var(--accent-blue); border-left: 4px solid var(--accent-blue); padding-left: 10px; margin: 0 0 20px 0; text-transform: uppercase; }
             
-            /* Table Styling */
-            table {{ width: 100%; border-collapse: collapse; margin-bottom: 10px; }}
-            th {{ font-size: 0.85em; color: var(--text-muted); padding: 10px 5px; border-bottom: 1px dashed var(--border-color); font-weight: normal; }}
-            td {{ padding: 12px 5px; text-align: center; border-bottom: 1px solid #1f242c; font-size: 1.05em; font-weight: bold; color: #fff; }}
-            .trend {{ font-size: 0.7em; margin-left: 4px; }}
+            table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+            th { font-size: 0.85em; color: var(--text-muted); padding: 10px 5px; border-bottom: 1px dashed var(--border-color); font-weight: normal; }
+            td { padding: 12px 5px; text-align: center; border-bottom: 1px solid #1f242c; font-size: 1.05em; font-weight: bold; color: #fff; }
+            .trend { font-size: 0.7em; margin-left: 4px; }
             
-            /* Grid Box Styling */
-            .grid-box {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }}
-            .grid-item {{ background: #010409; padding: 15px 10px; border-radius: 4px; text-align: center; border: 1px solid var(--border-color); transition: all 0.2s; }}
-            .grid-item:hover {{ border-color: var(--accent-blue); transform: translateY(-2px); }}
-            .grid-label {{ display: block; font-size: 0.8em; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; }}
+            .grid-box { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+            .grid-item { background: #010409; padding: 15px 10px; border-radius: 4px; text-align: center; border: 1px solid var(--border-color); transition: all 0.2s; }
+            .grid-item:hover { border-color: var(--accent-blue); transform: translateY(-2px); }
+            .grid-label { display: block; font-size: 0.8em; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; }
             
-            /* Links & Values */
-            .btn {{ display: inline-block; background: transparent; color: var(--accent-yellow); padding: 4px 12px; border-radius: 3px; text-decoration: none; font-size: 0.9em; border: 1px solid var(--accent-yellow); transition: all 0.2s; }}
-            .btn:hover {{ background: var(--accent-yellow); color: #000; }}
-            .val-text {{ color: #fff; font-weight: bold; letter-spacing: 0.5px; }}
+            .btn { display: inline-block; background: transparent; color: var(--accent-yellow); padding: 4px 12px; border-radius: 3px; text-decoration: none; font-size: 0.9em; border: 1px solid var(--accent-yellow); transition: all 0.2s; }
+            .btn:hover { background: var(--accent-yellow); color: #000; }
+            .val-text { color: #fff; font-weight: bold; letter-spacing: 0.5px; }
         </style>
     </head>
     <body>
         <div class="container">
             <h1>📡 Project Trident: 终极绞肉机雷达</h1>
-            <div class="time">>>> SYSTEM ALIVE | LAST SYNC: {beijing_time} (BJT)</div>
+            <div class="time">>>> SYSTEM ALIVE | LAST SYNC: 2026-04-25 21:07 (BJT)</div>
             
             <div class="card">
                 <h2>🌍 Tier 1: 宏观重力与天候 (Macro)</h2>
@@ -126,17 +65,17 @@ def generate_html(y_data, t_data):
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{y_data.get('US10Y', {{}}).get('value', 'N/A')}<span class="trend">{y_data.get('US10Y', {{}}).get('trend', '⚪')}</span></td>
-                                <td>{y_data.get('DXY', {{}}).get('value', 'N/A')}<span class="trend">{y_data.get('DXY', {{}}).get('trend', '⚪')}</span></td>
-                                <td>{cell(t_data.get('RRP', 'Link'), links['RRP'])}</td>
-                                <td>{cell(t_data.get('TGA', 'Link'), links['TGA'])}</td>
-                                <td>{y_data.get('VIX', {{}}).get('value', 'N/A')}<span class="trend">{y_data.get('VIX', {{}}).get('trend', '⚪')}</span></td>
-                                <td>{y_data.get('HYG', {{}}).get('value', 'N/A')}<span class="trend">{y_data.get('HYG', {{}}).get('trend', '⚪')}</span></td>
-                                <td>{cell(t_data.get('HYG_SPREAD', 'Link'), links['HYG_SPREAD'])}</td>
-                                <td>{y_data.get('GOLD', {{}}).get('value', 'N/A')}<span class="trend">{y_data.get('GOLD', {{}}).get('trend', '⚪')}</span></td>
-                                <td>{y_data.get('SILVER', {{}}).get('value', 'N/A')}<span class="trend">{y_data.get('SILVER', {{}}).get('trend', '⚪')}</span></td>
-                                <td>{y_data.get('COPPER', {{}}).get('value', 'N/A')}<span class="trend">{y_data.get('COPPER', {{}}).get('trend', '⚪')}</span></td>
-                                <td>{y_data.get('USDCNH', {{}}).get('value', 'N/A')}<span class="trend">{y_data.get('USDCNH', {{}}).get('trend', '⚪')}</span></td>
+                                <td>4.31%<span class="trend">⚪</span></td>
+                                <td>98.51<span class="trend">⚪</span></td>
+                                <td><span class='val-text'>$0B</span></td>
+                                <td><span class='val-text'>$1005968B</span></td>
+                                <td>18.71<span class="trend">⚪</span></td>
+                                <td>80.48<span class="trend">⚪</span></td>
+                                <td><span class='val-text'>2.86%</span></td>
+                                <td>4722.30<span class="trend">⚪</span></td>
+                                <td>76.38<span class="trend">⚪</span></td>
+                                <td>6.02<span class="trend">⚪</span></td>
+                                <td>6.83<span class="trend">⚪</span></td>
                             </tr>
                         </tbody>
                     </table>
@@ -146,52 +85,51 @@ def generate_html(y_data, t_data):
             <div class="card">
                 <h2>📈 Tier 2: 加密基石与估值生死线 (Valuation)</h2>
                 <div class="grid-box">
-                    <div class="grid-item"><span class="grid-label">BTC 现价</span><span class="val-text" style="color:var(--accent-green);font-size:1.2em;">{y_data.get('BTC_PRICE', {{}}).get('value', 'N/A')}</span></div>
-                    <div class="grid-item"><span class="grid-label">BTC 市占率</span>{cell(t_data.get('BTC.D', 'Link'), links['BTC_D_LINK'])}</div>
-                    <div class="grid-item"><span class="grid-label">USDT场外溢价</span>{cell("Link", links['USDT_PREMIUM'])}</div>
-                    <div class="grid-item"><span class="grid-label">贪婪恐慌指数</span>{cell(t_data.get('FEAR_GREED', 'Link'), links['FG'])}</div>
-                    <div class="grid-item"><span class="grid-label">以太坊 Gas</span>{cell(t_data.get('GAS', 'Link'), links['GAS'])}</div>
-                    <div class="grid-item"><span class="grid-label">MMFI 宽度</span>{cell("Link", links['MMFI'])}</div>
-                    <div class="grid-item"><span class="grid-label">Coinbase 溢价</span>{cell("Link", links['CB_PREM'])}</div>
-                    <div class="grid-item"><span class="grid-label">贝莱德 IBIT</span>{cell("Link", links['BLK_BTC'])}</div>
-                    <div class="grid-item"><span class="grid-label">贝莱德 ETHA</span>{cell("Link", links['BLK_ETH'])}</div>
-                    <div class="grid-item"><span class="grid-label">STH 散户成本</span>{cell("Link", links['STH'])}</div>
-                    <div class="grid-item"><span class="grid-label">MVRV 逃顶线</span>{cell("Link", links['MVRV'])}</div>
-                    <div class="grid-item"><span class="grid-label">AHR999 抄底</span>{cell("Link", links['AHR999'])}</div>
+                    <div class="grid-item"><span class="grid-label">BTC 现价</span><span class="val-text" style="color:var(--accent-green);font-size:1.2em;">$77,610.71</span></div>
+                    <div class="grid-item"><span class="grid-label">BTC 市占率</span><span class='val-text'>58.1%</span></div>
+                    <div class="grid-item"><span class="grid-label">USDT场外溢价</span><a href='https://www.feixiaohao.com/data/stable.html' target='_blank' class='btn'>👁️ 查看</a></div>
+                    <div class="grid-item"><span class="grid-label">贪婪恐慌指数</span><span class='val-text'>31 (Fear)</span></div>
+                    <div class="grid-item"><span class="grid-label">以太坊 Gas</span><a href='https://etherscan.io/gastracker' target='_blank' class='btn'>👁️ 查看</a></div>
+                    <div class="grid-item"><span class="grid-label">MMFI 宽度</span><a href='https://www.tradingview.com/symbols/MMFI/' target='_blank' class='btn'>👁️ 查看</a></div>
+                    <div class="grid-item"><span class="grid-label">Coinbase 溢价</span><a href='https://www.coinglass.com/zh/pro/i/coinbase-bitcoin-premium-index' target='_blank' class='btn'>👁️ 查看</a></div>
+                    <div class="grid-item"><span class="grid-label">贝莱德 IBIT</span><a href='https://www.coinglass.com/zh/bitcoin-etf' target='_blank' class='btn'>👁️ 查看</a></div>
+                    <div class="grid-item"><span class="grid-label">贝莱德 ETHA</span><a href='https://www.coinglass.com/zh/eth-etf' target='_blank' class='btn'>👁️ 查看</a></div>
+                    <div class="grid-item"><span class="grid-label">STH 散户成本</span><a href='https://www.coinglass.com/zh/pro/i/short-term-holder-price' target='_blank' class='btn'>👁️ 查看</a></div>
+                    <div class="grid-item"><span class="grid-label">MVRV 逃顶线</span><a href='https://www.bitcoinmagazinepro.com/charts/mvrv-zscore/' target='_blank' class='btn'>👁️ 查看</a></div>
+                    <div class="grid-item"><span class="grid-label">AHR999 抄底</span><a href='https://9992100.xyz/' target='_blank' class='btn'>👁️ 查看</a></div>
                 </div>
             </div>
 
             <div class="card">
                 <h2>🏛️ Tier 3: 华尔街老钱与深层流向 (TradFi & Flow)</h2>
                 <div class="grid-box">
-                    <div class="grid-item"><span class="grid-label" style="color:var(--accent-red);">稳定币总市值</span>{cell(t_data.get('STABLE_CAP', 'Link'), links['STABLE_LINK'])}</div>
-                    <div class="grid-item"><span class="grid-label" style="color:var(--accent-red);">7日净流向/铸币</span>{cell("Link", links['STABLE_FLOW'], "🔥 监控")}</div>
-                    <div class="grid-item"><span class="grid-label">SSR 购买力</span>{cell("Link", links['SSR'])}</div>
-                    <div class="grid-item"><span class="grid-label">USDe (Ethena)</span>{cell("Link", links['USDe'])}</div>
-                    <div class="grid-item"><span class="grid-label">PYUSD (PayPal)</span>{cell("Link", links['PYUSD'])}</div>
-                    <div class="grid-item"><span class="grid-label">Ondo Finance</span>{cell("Link", links['Ondo'])}</div>
-                    <div class="grid-item"><span class="grid-label">BUIDL (贝莱德)</span>{cell("Link", links['BUIDL'])}</div>
-                    <div class="grid-item"><span class="grid-label">BENJI (富兰克林)</span>{cell("Link", links['BENJI'])}</div>
-                    <div class="grid-item"><span class="grid-label">USDM (Mountain)</span>{cell("Link", links['USDM'])}</div>
-                    <div class="grid-item"><span class="grid-label">USTB (Superstate)</span>{cell("Link", links['USTB'])}</div>
-                    <div class="grid-item"><span class="grid-label">北向资金(A股)</span>{ah_cell}</div>
+                    <div class="grid-item"><span class="grid-label" style="color:var(--accent-red);">稳定币总市值</span><a href='https://defillama.com/stablecoins' target='_blank' class='btn'>👁️ 查看</a></div>
+                    <div class="grid-item"><span class="grid-label" style="color:var(--accent-red);">7日净流向/铸币</span><a href='https://defillama.com/stablecoins' target='_blank' class='btn'>🔥 监控</a></div>
+                    <div class="grid-item"><span class="grid-label">SSR 购买力</span><a href='https://www.tradingview.com/chart/?symbol=CRYPTOCAP%3ABTC%2FCRYPTOCAP%3ASTABLE.C' target='_blank' class='btn'>👁️ 查看</a></div>
+                    <div class="grid-item"><span class="grid-label">USDe (Ethena)</span><a href='https://defillama.com/protocol/stablecoins/ethena' target='_blank' class='btn'>👁️ 查看</a></div>
+                    <div class="grid-item"><span class="grid-label">PYUSD (PayPal)</span><a href='https://defillama.com/stablecoin/paypal-usd' target='_blank' class='btn'>👁️ 查看</a></div>
+                    <div class="grid-item"><span class="grid-label">Ondo Finance</span><a href='https://defillama.com/protocol/stablecoins/ondo-finance' target='_blank' class='btn'>👁️ 查看</a></div>
+                    <div class="grid-item"><span class="grid-label">BUIDL (贝莱德)</span><a href='https://defillama.com/rwa/asset/BUIDL' target='_blank' class='btn'>👁️ 查看</a></div>
+                    <div class="grid-item"><span class="grid-label">BENJI (富兰克林)</span><a href='https://defillama.com/rwa/asset/BENJI' target='_blank' class='btn'>👁️ 查看</a></div>
+                    <div class="grid-item"><span class="grid-label">USDM (Mountain)</span><a href='https://defillama.com/protocol/mountain-protocol' target='_blank' class='btn'>👁️ 查看</a></div>
+                    <div class="grid-item"><span class="grid-label">USTB (Superstate)</span><a href='https://defillama.com/protocol/superstate' target='_blank' class='btn'>👁️ 查看</a></div>
+                    <div class="grid-item"><span class="grid-label">北向资金(A股)</span><a href='https://quote.eastmoney.com/gb/zsHSAHP.html' target='_blank' class='btn'>👁️ 查看</a></div>
                 </div>
             </div>
 
             <div class="card">
                 <h2>🩸 Tier 4: 微观绞肉机与上帝底牌 (Microstructure)</h2>
                 <div class="grid-box">
-                    <div class="grid-item"><span class="grid-label">合约资金费率</span>{cell("Link", links['FUNDING'], "🗡️ 查费率")}</div>
-                    <div class="grid-item"><span class="grid-label">合约持仓当量(OI)</span>{cell("Link", links['CME_OI'])}</div>
-                    <div class="grid-item"><span class="grid-label">筹码多空比背离</span>{cell("Link", links['LS_RATIO'], "⚔️ 查背离")}</div>
-                    <div class="grid-item"><span class="grid-label">DEX 狂热交易量</span>{cell("Link", links['DEX_VOL'], "⚡ 查链上")}</div>
-                    <div class="grid-item"><span class="grid-label">矿工物理抛压</span>{cell("Link", links['MINER'], "⛏️ 查矿工")}</div>
-                    <div class="grid-item"><span class="grid-label">Deribit 灾难保险</span>{cell("Link", links['DVOL'], "🛡️ 查DVOL")}</div>
+                    <div class="grid-item"><span class="grid-label">合约资金费率</span><a href='https://www.coinglass.com/zh/FundingRate' target='_blank' class='btn'>🗡️ 查费率</a></div>
+                    <div class="grid-item"><span class="grid-label">合约持仓当量(OI)</span><a href='https://www.coinglass.com/zh/BitcoinOpenInterest' target='_blank' class='btn'>👁️ 查看</a></div>
+                    <div class="grid-item"><span class="grid-label">筹码多空比背离</span><a href='https://www.coinglass.com/zh/LongShortRatio' target='_blank' class='btn'>⚔️ 查背离</a></div>
+                    <div class="grid-item"><span class="grid-label">DEX 狂热交易量</span><a href='https://defillama.com/dexs' target='_blank' class='btn'>⚡ 查链上</a></div>
+                    <div class="grid-item"><span class="grid-label">矿工物理抛压</span><a href='https://www.theblock.co/data/on-chain-metrics/bitcoin/bitcoin-miner-revenue-daily' target='_blank' class='btn'>⛏️ 查矿工</a></div>
+                    <div class="grid-item"><span class="grid-label">Deribit 灾难保险</span><a href='https://www.deribit.com/statistics/BTC/volatility' target='_blank' class='btn'>🛡️ 查DVOL</a></div>
                 </div>
             </div>
             
         </div>
     </body>
     </html>
-    """
-    return html
+    
