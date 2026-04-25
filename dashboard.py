@@ -5,7 +5,7 @@ from datetime import datetime
 import pytz
 
 # ==========================================
-# 顶级宏观与微观流动性监控引擎 (GitHub Actions 战术大屏版)
+# 顶级宏观与微观流动性监控引擎 (GitHub Actions 战术大屏版 - 终极满载火力版)
 # ==========================================
 
 def get_yahoo_data():
@@ -19,7 +19,7 @@ def get_yahoo_data():
         "GOLD": "GC=F",       
         "SILVER": "SI=F",     
         "COPPER": "HG=F"      
-        # 注：雅虎财经的 AH 股数据已失效，从这里彻底踢出，防止报错污染日志。
+        # 雅虎财经的 AH 股数据抓取已踢出，防止 404 报错宕机
     }
     
     data = {}
@@ -47,7 +47,7 @@ def get_yahoo_data():
 def get_tactical_data():
     data = {}
     
-    # 1. 免密白嫖美联储 FRED 数据
+    # 1. 免密美联储 FRED 数据
     fred_series = {
         "TGA": "WTREGEN",
         "RRP": "RRPONTSYD",
@@ -99,15 +99,22 @@ def generate_html(y_data, t_data):
     beijing_time = datetime.now(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M')
     
     links = {
+        # --- 基础宏观 ---
         "RRP": "https://fred.stlouisfed.org/series/RRPONTSYD",
         "TGA": "https://fred.stlouisfed.org/series/WTREGEN",
         "HYG_SPREAD": "https://fred.stlouisfed.org/series/BAMLH0A0HYM2",
         "AH_LINK": "https://quote.eastmoney.com/gb/zsHSAHP.html",
+        "CN10Y_YIELD": "https://cn.tradingview.com/symbols/TVC-CN10Y/",  
+        
+        # --- 加密基础 ---
         "BTC_D_LINK": "https://www.tradingview.com/chart/?symbol=CRYPTOCAP%3ABTC.D",
         "USDT_PREMIUM": "https://www.feixiaohao.com/data/stable.html",
         "FG": "https://www.coinglass.com/zh/pro/i/FearGreedIndex",
         "GAS": "https://etherscan.io/gastracker",
         "MMFI": "https://www.tradingview.com/symbols/MMFI/",
+        "SOL_ETH_RATIO": "https://defillama.com/dexs/chains",
+        
+        # --- 估值与 ETF ---
         "CB_PREM": "https://www.coinglass.com/zh/pro/i/coinbase-bitcoin-premium-index",
         "FUNDING": "https://www.coinglass.com/zh/FundingRate",
         "BLK_BTC": "https://www.coinglass.com/zh/bitcoin-etf",
@@ -115,6 +122,14 @@ def generate_html(y_data, t_data):
         "STH": "https://www.coinglass.com/zh/pro/i/short-term-holder-price",
         "MVRV": "https://www.bitcoinmagazinepro.com/charts/mvrv-zscore/",
         "AHR999": "https://9992100.xyz/",
+        "PIZZA": "https://www.pizzint.watch/", 
+        
+        # --- 华尔街 RWA 与 东方流动性 ---
+        "RWA_TOTAL_MCAP": "https://defillama.com/rwa", 
+        "RWA_TOTAL_YIELD": "https://app.rwa.xyz/treasuries", 
+        "HK_BTC_ETF": "https://cn.tradingview.com/symbols/HKEX-3042/",    
+        "FDUSD_MCAP": "https://defillama.com/stablecoin/first-digital-usd", 
+        "KIMCHI_PREM": "https://cryptoquant.com/asset/btc/chart/market-data/korea-premium-index?window=DAY&sma=0&ema=0&priceScale=log&metricScale=linear&chartStyle=line",  
         "STABLE_LINK": "https://defillama.com/stablecoins",
         "STABLE_FLOW": "https://defillama.com/stablecoins",
         "SSR": "https://www.tradingview.com/chart/?symbol=CRYPTOCAP%3ABTC%2FCRYPTOCAP%3ASTABLE.C",
@@ -125,6 +140,8 @@ def generate_html(y_data, t_data):
         "BENJI": "https://defillama.com/rwa/asset/BENJI", 
         "USDM": "https://defillama.com/protocol/mountain-protocol",
         "USTB": "https://defillama.com/protocol/superstate",
+        
+        # --- 微观绞肉机 ---
         "CME_OI": "https://www.coinglass.com/zh/BitcoinOpenInterest",
         "LS_RATIO": "https://www.coinglass.com/zh/LongShortRatio",
         "DEX_VOL": "https://defillama.com/dexs",
@@ -138,7 +155,7 @@ def generate_html(y_data, t_data):
         else:
             return f"<span class='val-text'>{val}</span>"
 
-    # 前端保留 AH 溢价查看入口，但不依赖雅虎抓取数据，避免崩溃
+    # 前端保留 AH 溢价查看入口（无伤保留机制）
     ah_cell = cell("Link", links['AH_LINK'])
 
     html = f"""
@@ -230,6 +247,7 @@ def generate_html(y_data, t_data):
                 <div class="grid-box">
                     <div class="grid-item"><span class="grid-label">BTC 现价</span><span class="val-text" style="color:var(--accent-green);font-size:1.2em;">{y_data.get('BTC_PRICE', dict()).get('value', 'N/A')}</span></div>
                     <div class="grid-item"><span class="grid-label">BTC 市占率</span>{cell(t_data.get('BTC.D', 'Link'), links['BTC_D_LINK'])}</div>
+                    <div class="grid-item"><span class="grid-label">SOL/ETH 狂热比率</span>{cell("Link", links['SOL_ETH_RATIO'], "🔥 查比率")}</div>
                     <div class="grid-item"><span class="grid-label">USDT场外溢价</span>{cell("Link", links['USDT_PREMIUM'])}</div>
                     <div class="grid-item"><span class="grid-label">贪婪恐慌指数</span>{cell(t_data.get('FEAR_GREED', 'Link'), links['FG'])}</div>
                     <div class="grid-item"><span class="grid-label">以太坊 Gas</span>{cell(t_data.get('GAS', 'Link'), links['GAS'])}</div>
@@ -240,15 +258,23 @@ def generate_html(y_data, t_data):
                     <div class="grid-item"><span class="grid-label">STH 散户成本</span>{cell("Link", links['STH'])}</div>
                     <div class="grid-item"><span class="grid-label">MVRV 逃顶线</span>{cell("Link", links['MVRV'])}</div>
                     <div class="grid-item"><span class="grid-label">AHR999 抄底</span>{cell("Link", links['AHR999'])}</div>
+                    <div class="grid-item"><span class="grid-label">PIZZA 周期底线</span>{cell("Link", links['PIZZA'])}</div>
                 </div>
             </div>
 
             <div class="card">
-                <h2>🏛️ Tier 3: 华尔街老钱与深层流向 (TradFi & Flow)</h2>
+                <h2>🏛️ Tier 3: 东西方流动性总泵 (Global Flow)</h2>
                 <div class="grid-box">
                     <div class="grid-item"><span class="grid-label" style="color:var(--accent-red);">稳定币总市值</span>{cell(t_data.get('STABLE_CAP', 'Link'), links['STABLE_LINK'])}</div>
-                    <div class="grid-item"><span class="grid-label" style="color:var(--accent-red);">7日净流向/铸币</span>{cell("Link", links['STABLE_FLOW'], "🔥 监控")}</div>
+                    <div class="grid-item"><span class="grid-label" style="color:var(--accent-red);">稳定币净流向</span>{cell("Link", links['STABLE_FLOW'], "🔥 监控")}</div>
                     <div class="grid-item"><span class="grid-label">SSR 购买力</span>{cell("Link", links['SSR'])}</div>
+                    <div class="grid-item"><span class="grid-label">全网 RWA 总规模</span>{cell("Link", links['RWA_TOTAL_MCAP'], "👁️ 查看")}</div>
+                    <div class="grid-item"><span class="grid-label" style="color:var(--accent-yellow);">全网 RWA 收益率</span>{cell("Link", links['RWA_TOTAL_YIELD'], "👁️ 查看")}</div>
+                    <div class="grid-item"><span class="grid-label">香港 BTC ETF</span>{cell("Link", links['HK_BTC_ETF'], "🇨🇳 东方主力")}</div>
+                    <div class="grid-item"><span class="grid-label">FDUSD 东方钱袋</span>{cell("Link", links['FDUSD_MCAP'], "🇨🇳 离岸水管")}</div>
+                    <div class="grid-item"><span class="grid-label">泡菜溢价 (韩国)</span>{cell("Link", links['KIMCHI_PREM'], "🇰🇷 亚洲狂热")}</div>
+                    <div class="grid-item"><span class="grid-label">中国 10Y 国债</span>{cell("Link", links['CN10Y_YIELD'], "🇨🇳 放水总阀")}</div>
+                    <div class="grid-item"><span class="grid-label">北向资金(A股)</span>{ah_cell}</div>
                     <div class="grid-item"><span class="grid-label">USDe (Ethena)</span>{cell("Link", links['USDe'])}</div>
                     <div class="grid-item"><span class="grid-label">PYUSD (PayPal)</span>{cell("Link", links['PYUSD'])}</div>
                     <div class="grid-item"><span class="grid-label">Ondo Finance</span>{cell("Link", links['Ondo'])}</div>
@@ -256,7 +282,6 @@ def generate_html(y_data, t_data):
                     <div class="grid-item"><span class="grid-label">BENJI (富兰克林)</span>{cell("Link", links['BENJI'])}</div>
                     <div class="grid-item"><span class="grid-label">USDM (Mountain)</span>{cell("Link", links['USDM'])}</div>
                     <div class="grid-item"><span class="grid-label">USTB (Superstate)</span>{cell("Link", links['USTB'])}</div>
-                    <div class="grid-item"><span class="grid-label">北向资金(A股)</span>{ah_cell}</div>
                 </div>
             </div>
 
