@@ -132,7 +132,7 @@ def generate_html(y_data, t_data):
         
         # --- 华尔街 RWA 阵列 ---
         "STABLE_LINK": "https://defillama.com/stablecoins",
-        "SSR": "https://www.coinglass.com/zh/pro/i/SSR",
+        "SSR": ""SSR": "https://www.tradingview.com/chart/?symbol=CRYPTOCAP%3ABTC%2FCRYPTOCAP%3ASTABLE.C",
         "USDe": "https://defillama.com/protocol/stablecoins/ethena",
         "PYUSD": "https://defillama.com/stablecoin/paypal-usd", 
         "Ondo": "https://defillama.com/protocol/stablecoins/ondo-finance",
