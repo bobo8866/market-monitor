@@ -111,6 +111,7 @@ def generate_html(y_data, t_data):
         "TGA": "https://fred.stlouisfed.org/series/WTREGEN",
         "HYG_SPREAD": "https://fred.stlouisfed.org/series/BAMLH0A0HYM2",
         "AH_LINK": "https://quote.eastmoney.com/gb/zsHSAHP.html",
+        "CN10Y_YIELD": "https://cn.tradingview.com/symbols/TVC-CN10Y/",  
         "NORTH_FUNDS": "https://data.eastmoney.com/hsgt/index.html",
         
         # --- 加密基础 ---
@@ -119,6 +120,10 @@ def generate_html(y_data, t_data):
         "FG": "https://www.coinglass.com/zh/pro/i/FearGreedIndex",
         "GAS": "https://etherscan.io/gastracker",
         "MMFI": "https://www.tradingview.com/symbols/MMFI/",
+        "SOL_ETH_RATIO": "https://defillama.com/dexs/chains",
+        "HK_BTC_ETF": "https://cn.tradingview.com/symbols/HKEX-3042/",    # 监控香港现货 ETF 净流入
+        "FDUSD_MCAP": "https://defillama.com/stablecoin/first-digital-usd", # 东方/离岸主力稳定币
+        "KIMCHI_PREM": "https://cryptoquant.com/asset/btc/chart/market-data/korea-premium-index?window=DAY&sma=0&ema=0&priceScale=log&metricScale=linear&chartStyle=line",  
         
         # --- 估值与 ETF ---
         "CB_PREM": "https://www.coinglass.com/zh/pro/i/coinbase-bitcoin-premium-index",
@@ -134,13 +139,23 @@ def generate_html(y_data, t_data):
         "STABLE_LINK": "https://defillama.com/stablecoins",
         "SSR": "https://www.tradingview.com/chart/?symbol=CRYPTOCAP%3ABTC%2FCRYPTOCAP%3ASTABLE.C",
         "USDe": "https://defillama.com/protocol/stablecoins/ethena",
-        "PYUSD": "https://defillama.com/stablecoin/paypal-usd", 
+        "sUSDe_YIELD": "https://defillama.com/yields?token=SUSDE",
+        "PYUSD": "https://defillama.com/stablecoin/paypal-usd",
+        "PYUSD_YIELD": "https://defillama.com/yields?token=PYUSD",
         "Ondo": "https://defillama.com/protocol/stablecoins/ondo-finance",
-        "sFRAX": "https://defillama.com/stablecoin/frax",
+        "ONDO_YIELD": "https://defillama.com/protocol/yields/ondo-finance",
         "BUIDL": "https://defillama.com/rwa/asset/BUIDL",
+        "BUIDL_YIELD": "https://defillama.com/yields?token=BUIDL",
         "BENJI": "https://defillama.com/rwa/asset/BENJI", 
+        "BENJI_YIELD": "https://defillama.com/yields?token=BENJI",
         "USDM": "https://defillama.com/protocol/mountain-protocol",
+        "USDM_YIELD": "https://defillama.com/yields?token=USDM",
         "USTB": "https://defillama.com/protocol/superstate",
+        "USTB_YIELD": "https://defillama.com/yields?token=USTB",
+        "USDS_YIELD": "https://defillama.com/yields?token=USDS",
+        "USDS_MCAP": "https://defillama.com/stablecoin/dai",
+        "USDT_FLOW": "https://defillama.com/stablecoin/tether", 
+        "USDC_FLOW": "https://defillama.com/stablecoin/usd-coin",
         
         # --- 微观绞肉机 ---
         "CME_OI": "https://www.coinglass.com/zh/BitcoinOpenInterest",
